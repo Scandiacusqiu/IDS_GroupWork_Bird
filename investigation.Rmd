@@ -56,6 +56,17 @@ ggplot(df, aes(x = Trophic.Level, y = Mass)) +
   geom_jitter() +
   geom_smooth(method = "lm")
 ```
+```{r Habitat and Beak width}
+ggplot(data = data, aes(x = Beak.Width, fill = Habitat)) +
+  geom_histogram(alpha = 0.6, bins = 30, position = "identity") +
+  labs(
+    title = "Beak Width Histogram colored by Habitat",
+    x = "Beak Width(mm)",
+    y = "Count"
+  )
+
+
+```
 
 ```{r latitude and winglength}
 
