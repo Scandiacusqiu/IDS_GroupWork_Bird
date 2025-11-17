@@ -41,7 +41,24 @@ ggplot(data, aes(x=Beak.Width, y=Beak.Depth))+
        x = "Beak width (mm)", 
        y = "Beak depth (mm)")
 
+
+
 #Hypothesis confirmed to be true.
+  
+```
+
+```{r latitude and winglength}
+
+#fit a linear regression model to predict latitude based on wing length
 
 ```
 
+
+```{r habitat exploration}
+data %>% 
+  group_by(Habitat) %>% 
+  count() %>% 
+  arrange(desc(n)) %>% 
+  view()
+
+```
