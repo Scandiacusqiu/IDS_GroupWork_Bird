@@ -34,7 +34,7 @@ data <- read_csv("AVONET3_BirdTree.csv") %>%
 ```{r beak length and depth correlation}
 #Hypothesis: Bird beak depth increases as beak length increases. Positive correlation.
 
-ggplot(data, aes(x=Beak.Width, y=Beak.Depth))+
+ggplot(data, aes(x=Beak.Width, y=Beak.Depth, color = Centroid.Latitude))+
          geom_point()+
   geom_smooth(method= "lm")+
   labs(title = "Bird beak width & depth",
