@@ -47,6 +47,16 @@ ggplot(data, aes(x=Beak.Width, y=Beak.Depth, color = Centroid.Latitude))+
   
 ```
 
+```{r trophic_level mass}
+df <- read.csv(file.choose())
+model <- lm(Mass ~ Trophic.Level, data = df)
+summary(model)
+
+ggplot(df, aes(x = Trophic.Level, y = Mass)) +
+  geom_jitter() +
+  geom_smooth(method = "lm")
+```
+
 ```{r latitude and winglength}
 
 #fit a linear regression model to predict latitude based on wing length
