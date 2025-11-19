@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load-lib, message = FALSE}
 library(tidyverse)
-# Add any other libraries here
+library(tidymodels)
 
 
 
@@ -48,11 +48,8 @@ ggplot(data, aes(x=Beak.Width, y=Beak.Depth, color = Centroid.Latitude))+
 ```
 
 ```{r trophic_level mass}
-df <- read.csv(file.choose())
-model <- lm(Mass ~ Trophic.Level, data = df)
-summary(model)
 
-ggplot(df, aes(x = Trophic.Level, y = Mass)) +
+ggplot(data, aes(x = Trophic.Level, y = Mass)) +
   geom_jitter() +
   geom_smooth(method = "lm")
 ```
@@ -81,5 +78,64 @@ data %>%
   count() %>% 
   arrange(desc(n)) %>% 
   view()
+
+```
+
+```{r Start model fitting}
+# Choose needed data
+data_lat <- data %>% 
+  select(Beak.Length_Culmen, 
+         Beak.Length_Nares, 
+         Beak.Depth, 
+         Range.Size, 
+         Habitat, 
+         Mass, 
+         Centroid.Latitude)
+# Modify col names
+colnames(data_lat) <- c("Beak_length_C", 
+                        "Beak_Length_N", 
+                        "Beak_Depth", 
+                        "Range_Size", 
+                        "Habitat", 
+                        "Mass", 
+                        "Latitude")
+
+
+# Start modelling
+set.seed(2801)
+data_split <- initial_split(data_lat, 0.8)
+data_train <- training(data_split)
+data_test <- testing(data_split)
+
+
+# Construct workflow
+data_rec <- recipe(Latitude ~ ., data = data_lat) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod <- linear_reg() %>% 
+  set_engine("lm")
+
+data_wflow <- workflow() %>% 
+  add_model(data_mod) %>% 
+  add_recipe(data_rec)
+
+data_fit <- data_wflow %>% 
+  fit(data = data_train)
+# tidy(data_fit)
+
+data_pred <- predict(data_fit, data_test) %>% 
+  bind_cols(data_test) %>% 
+  print(n = 10)
+
+
+# Check model performance
+folds <- vfold_cv(data_train, v = 5)
+data_fit_rs <- data_wflow %>% 
+  fit_resamples(folds)
+collect_metrics(data_fit_rs)
+
+rmse(data_pred, truth = Latitude, estimate = .pred)
+rsq(data_pred, truth = Latitude, estimate = .pred)
 
 ```
