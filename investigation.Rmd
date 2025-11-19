@@ -25,11 +25,7 @@ library(tidymodels)
 
 ```{r load-data}
 # load your data 
-data <- read_csv("AVONET3_BirdTree.csv") %>% 
-  view()
-
-
-
+data <- read_csv("AVONET3_BirdTree.csv")
 ```
 ```{r beak length and depth correlation}
 #Hypothesis: Bird beak depth increases as beak length increases. Positive correlation.
@@ -62,7 +58,6 @@ ggplot(data = data, aes(x = Beak.Width, fill = Habitat)) +
     y = "Count"
   )
 
-
 ```
 
 ```{r latitude and winglength}
@@ -76,14 +71,13 @@ ggplot(data = data, aes(x = Beak.Width, fill = Habitat)) +
 data %>% 
   group_by(Habitat) %>% 
   count() %>% 
-  arrange(desc(n)) %>% 
-  view()
+  arrange(desc(n))
 
 ```
 
 ```{r Start model fitting}
 # Choose needed data
-data_lat <- data %>% 
+data_lat1 <- data %>% 
   select(Beak.Length_Culmen, 
          Beak.Length_Nares, 
          Beak.Depth, 
@@ -92,7 +86,7 @@ data_lat <- data %>%
          Mass, 
          Centroid.Latitude)
 # Modify col names
-colnames(data_lat) <- c("Beak_length_C", 
+colnames(data_lat1) <- c("Beak_length_C", 
                         "Beak_Length_N", 
                         "Beak_Depth", 
                         "Range_Size", 
@@ -103,39 +97,92 @@ colnames(data_lat) <- c("Beak_length_C",
 
 # Start modelling
 set.seed(2801)
-data_split <- initial_split(data_lat, 0.8)
-data_train <- training(data_split)
-data_test <- testing(data_split)
+data_split1 <- initial_split(data_lat1, 0.8)
+data_train1 <- training(data_split1)
+data_test1 <- testing(data_split1)
 
 
 # Construct workflow
-data_rec <- recipe(Latitude ~ ., data = data_lat) %>% 
+data_rec1 <- recipe(Latitude ~ ., data = data_lat1) %>% 
   step_naomit(all_predictors()) %>% 
   step_dummy(all_nominal(), -all_outcomes())
 
-data_mod <- linear_reg() %>% 
+data_mod1 <- linear_reg() %>% 
   set_engine("lm")
 
-data_wflow <- workflow() %>% 
-  add_model(data_mod) %>% 
-  add_recipe(data_rec)
+data_wflow1 <- workflow() %>% 
+  add_model(data_mod1) %>% 
+  add_recipe(data_rec1)
 
-data_fit <- data_wflow %>% 
-  fit(data = data_train)
+data_fit1 <- data_wflow1 %>% 
+  fit(data = data_train1)
 # tidy(data_fit)
 
-data_pred <- predict(data_fit, data_test) %>% 
-  bind_cols(data_test) %>% 
+data_pred1 <- predict(data_fit1, data_test1) %>% 
+  bind_cols(data_test1) %>% 
   print(n = 10)
 
 
 # Check model performance
-folds <- vfold_cv(data_train, v = 5)
-data_fit_rs <- data_wflow %>% 
-  fit_resamples(folds)
-collect_metrics(data_fit_rs)
+folds1 <- vfold_cv(data_train1, v = 5)
+data_fit_rs1 <- data_wflow1 %>% 
+  fit_resamples(folds1)
+collect_metrics(data_fit_rs1)
 
-rmse(data_pred, truth = Latitude, estimate = .pred)
-rsq(data_pred, truth = Latitude, estimate = .pred)
+rmse(data_pred1, truth = Latitude, estimate = .pred)
+rsq(data_pred1, truth = Latitude, estimate = .pred)
+```
 
+```{r fit model again using less predictors}
+# Choose needed data
+data_lat2 <- data %>% 
+  select(Range.Size,
+         Trophic.Level, 
+         Habitat, 
+         Mass, 
+         Centroid.Latitude)
+# Modify col names
+colnames(data_lat2) <- c("Range_Size", 
+                         "Trophic_Level", 
+                         "Habitat", 
+                         "Mass", 
+                         "Latitude")
+
+
+# Start modelling
+set.seed(2801)
+data_split2 <- initial_split(data_lat2, 0.8)
+data_train2 <- training(data_split2)
+data_test2 <- testing(data_split2)
+
+
+# Construct workflow
+data_rec2 <- recipe(Latitude ~ ., data = data_lat2) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod2 <- linear_reg() %>% 
+  set_engine("lm")
+
+data_wflow2 <- workflow() %>% 
+  add_model(data_mod2) %>% 
+  add_recipe(data_rec2)
+
+data_fit2 <- data_wflow2 %>% 
+  fit(data = data_train2)
+# tidy(data_fit)
+
+data_pred2 <- predict(data_fit2, data_test2) %>% 
+  bind_cols(data_test2) %>% 
+  print(n = 10)
+
+
+# Check model performance
+folds2 <- vfold_cv(data_train2, v = 5)
+data_fit_rs2 <- data_wflow2 %>% 
+  fit_resamples(folds2)
+collect_metrics(data_fit_rs2)
+
+rmse(data_pred2, truth = Latitude, estimate = .pred)
+rsq(data_pred2, truth = Latitude, estimate = .pred)
 ```
