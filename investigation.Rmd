@@ -249,5 +249,69 @@ data_auc <- data_pred %>%
   roc_auc(truth = Habitat.B, .pred_Forest)
 
 data_auc
+```
 
+```{r go with trophic level and range.size}
+# Choose needed data
+data_T <- data %>% 
+  select(Range.Size,
+         Trophic.Level, 
+         Mass, 
+         Centroid.Latitude) %>% 
+  mutate(T = case_when(Trophic.Level == "Scavenger" ~ "Yes", 
+                       TRUE ~ "No"))
+# Modify col names
+colnames(data_T) <- c("Range_Size", 
+                         "Trophic_Level", 
+                         "Mass", 
+                         "Latitude", 
+                      "Scavenger_10")
+
+
+# Start modelling
+set.seed(2801)
+data_split2 <- initial_split(data_T, 0.8)
+data_train2 <- training(data_split2)
+data_test2 <- testing(data_split2)
+
+
+# Construct workflow
+data_rec2 <- recipe(Scavenger_10 ~ ., data = data_T) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod2 <- logistic_reg() %>% 
+  set_engine("glm")
+
+data_wflow2 <- workflow() %>% 
+  add_model(data_mod2) %>% 
+  add_recipe(data_rec2)
+
+data_fit2 <- data_wflow2 %>% 
+  fit(data = data_train2)
+# tidy(data_fit)
+
+data_pred2 <- predict(data_fit2, data_test2) %>% 
+  bind_cols(data_test2) %>% 
+  mutate(T = case_when(Scavenger_10 == "Yes" ~ 1, 
+                       TRUE ~ 0,), 
+         .pred_class = case_when(.pred_class == "Yes" ~ 1, 
+                              TRUE ~ 0)) %>% 
+  print(n = 10)
+
+
+
+# Check model performance
+folds2 <- vfold_cv(data_train2, v = 5)
+data_fit_rs2 <- data_wflow2 %>% 
+  fit_resamples(folds2)
+collect_metrics(data_fit_rs2)
+
+rmse(data_pred2, truth = T, estimate = .pred_class)
+rsq(data_pred2, truth = T, estimate = .pred_class)
+
+data_auc <- data_pred2 %>% 
+  roc_auc(truth = T, .pred_class)
+
+data_auc
 ```
