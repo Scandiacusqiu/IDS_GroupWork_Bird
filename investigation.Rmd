@@ -311,7 +311,18 @@ rmse(data_pred2, truth = T, estimate = .pred_class)
 rsq(data_pred2, truth = T, estimate = .pred_class)
 
 data_auc <- data_pred2 %>% 
-  roc_auc(truth = T, .pred_class)
+  mutate(T = factor(T)) %>%
+  roc_auc(truth = T, .pred_class, event_level = "second")
 
 data_auc
+
+count(data, Trophic.Level)
+```
+
+```{r limit birds in one region}
+amazon_data <- data %>% 
+  filter(Centroid.Latitude > -10 & Centroid.Latitude < 10, Centroid.Longitude > -73 & Centroid.Longitude < -40) %>% 
+  count()
+
+
 ```
