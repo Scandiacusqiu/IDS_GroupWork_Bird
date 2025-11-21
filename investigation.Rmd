@@ -25,7 +25,7 @@ library(tidymodels)
 
 ```{r load-data}
 # load your data 
-data <- read_csv("AVONET3_BirdTree.csv")
+data <- read_csv("data/AVONET3_BirdTree.csv")
 ```
 ```{r beak length and depth correlation}
 #Hypothesis: Bird beak depth increases as beak length increases. Positive correlation.
@@ -185,4 +185,69 @@ collect_metrics(data_fit_rs2)
 
 rmse(data_pred2, truth = Latitude, estimate = .pred)
 rsq(data_pred2, truth = Latitude, estimate = .pred)
+```
+
+```{R investigating habitat using beak shape}
+##Habitat and beak shape
+
+ggplot(data, 
+       mapping = aes(
+         x = Beak.Depth,   
+         y = Beak.Width,
+         colour= Habitat
+       )) +
+  geom_point() +  
+  geom_smooth(method = lm)
+
+#most significant difference forests and wetlands
+
+data_1<- data%>% 
+  mutate(Habitat.B= case_when(
+    Habitat == "Forest" ~ "Forest",
+    Habitat == "Wetland" ~ "Wetland",
+    TRUE ~ NA)) %>% 
+  filter(Habitat.B == "Forest" | Habitat.B == "Wetland") 
+
+set.seed(1234)
+data_split <- initial_split(data_1)
+data_train <- training(data_split)
+data_test  <- testing(data_split)
+
+data_rec_1 <- recipe(Habitat.B ~ Beak.Width + Beak.Depth, data= data_1)
+
+data_mod_1 <- logistic_reg() %>% 
+  set_engine("glm")
+
+data_wflow_1 <- workflow() %>% 
+  add_model(data_mod_1) %>% 
+  add_recipe(data_rec_1)
+
+data_fit_1<- data_wflow_1 %>% 
+  fit(data = data_train)
+
+tidy(data_fit_1)
+
+data_pred <- predict(data_fit_1, data_test, type = "prob") %>% 
+  bind_cols(data_test) 
+data_pred
+
+data_pred %>%
+  mutate( 
+    Habitat.B = factor(Habitat.B,
+                             levels = c("Forest", "Wetland"))) %>% 
+  roc_curve(
+    truth = Habitat.B,
+    .pred_Forest,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+data_auc <- data_pred %>% 
+  mutate( 
+    Habitat.B = factor(Habitat.B,
+                             levels = c("Forest", "Wetland"))) %>%
+  roc_auc(truth = Habitat.B, .pred_Forest)
+
+data_auc
+
 ```
