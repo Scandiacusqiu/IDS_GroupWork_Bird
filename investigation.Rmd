@@ -255,17 +255,19 @@ data_auc
 # Choose needed data
 data_T <- data %>% 
   select(Range.Size,
-         Trophic.Level, 
+         Trophic.Niche, 
          Mass, 
-         Centroid.Latitude) %>% 
-  mutate(T = case_when(Trophic.Level == "Scavenger" ~ "Yes", 
+         Centroid.Latitude, 
+         `Hand-Wing.Index`
+         ) %>% 
+  mutate(T = case_when(Trophic.Niche == "Invertivore" ~ "Yes", 
                        TRUE ~ "No"))
 # Modify col names
-colnames(data_T) <- c("Range_Size", 
-                         "Trophic_Level", 
-                         "Mass", 
-                         "Latitude", 
-                      "Scavenger_10")
+# colnames(data_T) <- c("Range_Size", 
+#                          "Trophic_Level", 
+#                          "Mass", 
+#                          "Latitude", 
+#                       "Scavenger_10")
 
 
 # Start modelling
@@ -276,7 +278,7 @@ data_test2 <- testing(data_split2)
 
 
 # Construct workflow
-data_rec2 <- recipe(Scavenger_10 ~ ., data = data_T) %>% 
+data_rec2 <- recipe(T ~ `Hand-Wing.Index`, data = data_T) %>% 
   step_naomit(all_predictors()) %>% 
   step_dummy(all_nominal(), -all_outcomes())
 
@@ -293,9 +295,9 @@ data_fit2 <- data_wflow2 %>%
 
 data_pred2 <- predict(data_fit2, data_test2) %>% 
   bind_cols(data_test2) %>% 
-  mutate(T = case_when(Scavenger_10 == "Yes" ~ 1, 
+  mutate(T = case_when(T == "Yes" ~ 1, 
                        TRUE ~ 0,), 
-         .pred_class = case_when(.pred_class == "Yes" ~ 1, 
+         .pred_class = case_when(T == "Yes" ~ 1, 
                               TRUE ~ 0)) %>% 
   print(n = 10)
 
@@ -319,10 +321,69 @@ data_auc
 count(data, Trophic.Level)
 ```
 
-```{r limit birds in one region}
-amazon_data <- data %>% 
-  filter(Centroid.Latitude > -10 & Centroid.Latitude < 10, Centroid.Longitude > -73 & Centroid.Longitude < -40) %>% 
-  count()
+```{r invertivore ~ handwingindex}
+# Choose needed data
+data_hwi <- data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`) %>% 
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
 
 
+# Start modelling
+set.seed(8888)
+data_split1 <- initial_split(data_hwi, 0.8)
+data_train1 <- training(data_split1)
+data_test1 <- testing(data_split1)
+
+
+# Construct workflow
+data_rec1 <- recipe(Invertivore ~ `Hand-Wing.Index`, data = data_train1) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod1 <- logistic_reg() %>% 
+  set_engine("glm")
+
+data_wflow1 <- workflow() %>% 
+  add_model(data_mod1) %>% 
+  add_recipe(data_rec1)
+
+data_fit1 <- data_wflow1 %>% 
+  fit(data = data_train1)
+# tidy(data_fit)
+
+data_pred1 <- predict(data_fit1, data_test1, type = "prob") %>% 
+  bind_cols(data_test1) %>% 
+  print(n = 10)
+
+data_pred1 <- data_pred1 %>% 
+  mutate(Invertivore_fac = factor(Invertivore), 
+         Invertivore_num = as.numeric(Invertivore), 
+         .pred = case_when(.pred_1 > 0.7 ~ 1, 
+                           TRUE ~ 0))
+
+data_pred1 %>%
+  roc_curve(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+data_pred1 %>%
+  roc_auc(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  )
+
+
+# Check model performance
+folds1 <- vfold_cv(data_train1, v = 5)
+data_fit_rs1 <- data_wflow1 %>% 
+  fit_resamples(folds1)
+collect_metrics(data_fit_rs1)
+
+rmse(data_pred1, truth = Invertivore_num, estimate = .pred)
+rsq(data_pred1, truth = Invertivore_num, estimate = .pred)
 ```
