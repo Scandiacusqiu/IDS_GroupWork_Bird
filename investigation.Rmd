@@ -323,6 +323,7 @@ count(data, Trophic.Level)
 ```
 
 ```{r invertivore ~ handwingindex}
+
 # Choose needed data
 data_hwi <- data %>% 
   select(Trophic.Niche, `Hand-Wing.Index`) %>% 
@@ -398,4 +399,89 @@ collect_metrics(data_fit_rs1)
 
 rmse(data_pred1, truth = Invertivore_num, estimate = .pred)
 rsq(data_pred1, truth = Invertivore_num, estimate = .pred)
+```
+
+
+```{r find mass could be a predictor as well}
+data %>%
+  ggplot(aes(x = log(Mass), y = Trophic.Niche)) +
+  geom_jitter()
+```
+
+```{r invertivore ~ handwingindex + Mass}
+# Choose needed data
+data_hwi2 <- data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>% 
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+
+
+# Start modelling
+set.seed(8888)
+data_split2 <- initial_split(data_hwi2)
+data_train2 <- training(data_split2)
+data_test2 <- testing(data_split2)
+
+
+# Construct workflow
+data_rec2 <- recipe(Invertivore ~ `Hand-Wing.Index` + Mass, data = data_train2) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod2 <- logistic_reg() %>% 
+  set_engine("glm")
+
+data_wflow2 <- workflow() %>% 
+  add_model(data_mod2) %>% 
+  add_recipe(data_rec2)
+
+data_fit2 <- data_wflow2 %>% 
+  fit(data = data_train2)
+# tidy(data_fit)
+
+data_pred2 <- predict(data_fit2, data_test2, type = "prob") %>% 
+  bind_cols(data_test2) %>% 
+  print(n = 10)
+```
+
+```{r check model performence}
+cut_off_prob <- 0.45
+data_pred2 <- data_pred2 %>% 
+  mutate(Invertivore_fac = factor(Invertivore), 
+         Invertivore_num = as.numeric(Invertivore), 
+         .pred = case_when(.pred_1 > cut_off_prob ~ 1, 
+                           TRUE ~ 0))
+
+data_pred2 %>% 
+  mutate(
+    response = if_else(Invertivore == "1", "Invertivore", "Not Invertivore"), 
+    Invertivore_pred = if_else(.pred_1 >= cut_off_prob, "Predicted Invertivore", "Predicted Not Invertivore")
+  )  %>% 
+  count(response, Invertivore_pred) %>% 
+  pivot_wider(names_from = Invertivore_pred, values_from = n)
+
+data_pred2 %>%
+  roc_curve(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+data_pred2 %>%
+  roc_auc(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  )
+
+
+folds1 <- vfold_cv(data_train2, v = 5)
+data_fit_rs2 <- data_wflow2 %>% 
+  fit_resamples(folds1)
+collect_metrics(data_fit_rs1)
+
+rmse(data_pred2, truth = Invertivore_num, estimate = .pred)
+rsq(data_pred2, truth = Invertivore_num, estimate = .pred)
+```
 ```
