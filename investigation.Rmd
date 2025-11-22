@@ -27,6 +27,7 @@ library(tidymodels)
 # load your data 
 data <- read_csv("data/AVONET3_BirdTree.csv")
 ```
+
 ```{r beak length and depth correlation}
 #Hypothesis: Bird beak depth increases as beak length increases. Positive correlation.
 
@@ -355,12 +356,24 @@ data_fit1 <- data_wflow1 %>%
 data_pred1 <- predict(data_fit1, data_test1, type = "prob") %>% 
   bind_cols(data_test1) %>% 
   print(n = 10)
+```
 
+
+```{r check model performence}
+cut_off_prob <- 0.45
 data_pred1 <- data_pred1 %>% 
   mutate(Invertivore_fac = factor(Invertivore), 
          Invertivore_num = as.numeric(Invertivore), 
-         .pred = case_when(.pred_1 > 0.7 ~ 1, 
+         .pred = case_when(.pred_1 > cut_off_prob ~ 1, 
                            TRUE ~ 0))
+
+data_pred1 %>% 
+  mutate(
+    response = if_else(Invertivore == "1", "Invertivore", "Not Invertivore"), 
+    Invertivore_pred = if_else(.pred_1 >= cut_off_prob, "Predicted Invertivore", "Predicted Not Invertivore")
+  )  %>% 
+  count(response, Invertivore_pred) %>% 
+  pivot_wider(names_from = Invertivore_pred, values_from = n)
 
 data_pred1 %>%
   roc_curve(
@@ -378,7 +391,6 @@ data_pred1 %>%
   )
 
 
-# Check model performance
 folds1 <- vfold_cv(data_train1, v = 5)
 data_fit_rs1 <- data_wflow1 %>% 
   fit_resamples(folds1)
