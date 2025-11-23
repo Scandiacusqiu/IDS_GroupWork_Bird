@@ -42,14 +42,14 @@ figshare.com. (n.d.). AVONET: morphological, ecological and geographical data fo
 
 #Introduction
 
-Bird morphology and ecological traits offer valuable insight into how different species adapt to their environments. The AVONET dataset contains thousands of bird species with detailed measurements of their morphology, habitat, and trophic ecology. This rich dataset allows us to explore questions regarding trait correlations and predictive modelling.
+Bird morphology and ecological traits offer valuable insight into how different species adapt to their environments. The AVONET dataset contains thousands of bird species with measurements of their morphology, habitat, and trophic ecology. This dataset allows us to explore questions regarding correlations of different bird traits, and of potential predictive modelling.
 
-Our analysis investigates two key questions inspired by our initial exploration:
+Our analysis investigates two key questions:
 
 1. To what extent can morphological traits explain ecological characteristic such as trophic level or latitude?
 2. Which morphological variables show meaningful correlations with each other?
 
-These questions were motivated by observations and hypothesis generated during our group presentation
+These questions were motivated by our hypothesis generated during group discussions, using logical thinking based on our knowledge of biology and animal adaptations based on lifestyle.
 
 #Data Overview
 
@@ -66,8 +66,10 @@ tibble(
 
 
 # Exploratory Statistics
-1. Correlation: Beak Width & Beak Depth
-We began by exploring correlations between traits we suspecteed to be biologically related. A scatterplot with a linear trend line indicated a strong positive correlation between beak width and beak depth.
+1. ```Correlation: Beak Width & Beak Depth```
+
+\n
+We began by exploring correlations between traits we suspected to be related based on our knowlegde of bird biology. After constructing a scatterplot with a linear model, the line of best fit indicated a strong positive correlation between beak width and beak depth.
 
 ```{r beak length and depth correlation, echo=FALSE}
 #Hypothesis: Bird beak depth increases as beak length increases. Positive correlation.
@@ -81,8 +83,10 @@ ggplot(data, aes(x=Beak.Width, y=Beak.Depth, color = Centroid.Latitude))+
 
 ```
 
-2. Predicting Latitude
-We attempted to predict centroid latitude using morphological variables. However, our model showed no meaningful predictive signal. This suggests that global latitude does not strongly shape overall morphological configurations once phylogenetically diverse species are pooled.
+2. ```Predicting Latitude```
+
+\n
+We then attempted to predict centroid latitude using these morphological variables (beak width and length). However, our model showed no meaningful visual correlation- the colours were mixed throughout the plane of the graph. This suggests that latitude of bird habitats do not strongly effect their morphological adaptations.
 ```{r predicting latitude, echo=FALSE}
 # Choose needed data
 data_lat1 <- data %>% 
@@ -142,9 +146,11 @@ rsq(data_pred1, truth = Latitude, estimate = .pred)
 ```
 
 
-3. Exploring Trophic Level
-Further exploration examined whether variables such as range size and mass might differentiate trophic groups.
-A boxplot shows large variance within each trophic category, and our ROC analysis illustrates very low predictive performance (AUC close to 0.5), indicating no usable discrimination between scavengers and others based on range size.
+3. ```Exploring Trophic Level```
+
+\n
+Our further explorations examined whether range size varied across trophic groups.
+A boxplot showed large variance within each trophic category, and our ROC analysis illustrated very low predictive performance (AUC close to 0.5), indicating no usable distinctions between scavengers and other trophic levels based on range size.
 ```{r exploring trophic level, echo=FALSE}
 
 data$Trophic.Level <- as.factor(data$Trophic.Level)
