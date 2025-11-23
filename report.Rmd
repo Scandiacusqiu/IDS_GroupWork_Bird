@@ -32,18 +32,6 @@ Can we accurately predict certain characteristics of birds using chosen explanat
 
 ## Data
 
-Avonet birdtree contains summary statistics on specific characteristics of birds. Many are numerical variables (eg. Beak depth), but some are categorical (eg. Trophic level).Over 10,000 observations allows for a big sample size.
-
-```{r labelling variables}
-
-tibble(
-  variable = c("Centroid Latitude", "Trophic level", "Beak width", "Beak depth", "Habitat", "Mass", "Wing length", "Hangwingindex"),
-  Type = c("Numerical", "Categorical", "Numerical", "Numerical", "Categorical", "Numerical", "Numerical",  "Numerical"),
-  Description = c("The geometric centre of the species range", "Categorical variable based on the composition of a birds' diet", "Width of the beak at the anterior edge of the nostrils", "Depth of the beak at the anterior edge of the nostrils", "Where the bird lives", "Body mass of species average", "Length from the carpal joint to the tip of the longest primary on the unflattened wing", "A measurement of a bird's wing shape that indicates flight efficiency and dispersal ability")
-)
-```
-
- 
 figshare.com. (n.d.). AVONET: morphological, ecological and geographical data for all birds (Tobias et al 2022 Ecology Letters doi: https://doi.org/10.111/ele.13898). [online] Available at: https://figshare.com/s/b990722d72a26b5bfead. 
 
 
@@ -67,7 +55,7 @@ These questions were motivated by observations and hypothesis generated during o
 
 Avonet birdtree contains summary statistics on specific characteristics of birds. Many are numerical variables (eg. Beak depth), but some are categorical (eg. Trophic level).Over 10,000 observations allows for a big sample size.
 
-```{r labelling variables}
+```{r labelling variables 1, echo=FALSE}
 
 tibble(
   variable = c("Centroid Latitude", "Trophic level", "Beak width", "Beak depth", "Habitat", "Mass", "Wing length", "Hangwingindex"),
@@ -81,8 +69,125 @@ tibble(
 1. Correlation: Beak Width & Beak Depth
 We began by exploring correlations between traits we suspecteed to be biologically related. A scatterplot with a linear trend line indicated a strong positive correlation between beak width and beak depth.
 
-## References
+```{r beak length and depth correlation, echo=FALSE}
+#Hypothesis: Bird beak depth increases as beak length increases. Positive correlation.
 
-List any references here. You should, at a minimum, list your data source.
+ggplot(data, aes(x=Beak.Width, y=Beak.Depth, color = Centroid.Latitude))+
+         geom_point()+
+  geom_smooth(method= "lm")+
+  labs(title = "Bird beak width & depth",
+       x = "Beak width (mm)", 
+       y = "Beak depth (mm)")
+
+```
+
+2. Predicting Latitude
+We attempted to predict centroid latitude using morphological variables. However, our model showed no meaningful predictive signal. This suggests that global latitude does not strongly shape overall morphological configurations once phylogenetically diverse species are pooled.
+```{r predicting latitude, echo=FALSE}
+# Choose needed data
+data_lat1 <- data %>% 
+  select(Beak.Length_Culmen, 
+         Beak.Length_Nares, 
+         Beak.Depth, 
+         Range.Size, 
+         Habitat, 
+         Mass, 
+         Centroid.Latitude)
+# Modify col names
+colnames(data_lat1) <- c("Beak_length_C", 
+                        "Beak_Length_N", 
+                        "Beak_Depth", 
+                        "Range_Size", 
+                        "Habitat", 
+                        "Mass", 
+                        "Latitude")
 
 
+# Start modelling
+set.seed(2801)
+data_split1 <- initial_split(data_lat1, 0.8)
+data_train1 <- training(data_split1)
+data_test1 <- testing(data_split1)
+
+
+# Construct workflow
+data_rec1 <- recipe(Latitude ~ ., data = data_lat1) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod1 <- linear_reg() %>% 
+  set_engine("lm")
+
+data_wflow1 <- workflow() %>% 
+  add_model(data_mod1) %>% 
+  add_recipe(data_rec1)
+
+data_fit1 <- data_wflow1 %>% 
+  fit(data = data_train1)
+# tidy(data_fit)
+
+data_pred1 <- predict(data_fit1, data_test1) %>% 
+  bind_cols(data_test1) %>% 
+  print(n = 10)
+
+
+# Check model performance
+folds1 <- vfold_cv(data_train1, v = 5)
+data_fit_rs1 <- data_wflow1 %>% 
+  fit_resamples(folds1)
+collect_metrics(data_fit_rs1)
+
+rmse(data_pred1, truth = Latitude, estimate = .pred)
+rsq(data_pred1, truth = Latitude, estimate = .pred)
+```
+
+
+3. Exploring Trophic Level
+Further exploration examined whether variables such as range size and mass might differentiate trophic groups.
+A boxplot shows large variance within each trophic category, and our ROC analysis illustrates very low predictive performance (AUC close to 0.5), indicating no usable discrimination between scavengers and others based on range size.
+```{r exploring trophic level, echo=FALSE}
+
+data$Trophic.Level <- as.factor(data$Trophic.Level)
+
+data_clean <- data %>%
+    filter(!is.na(Range.Size),
+           !is.na(Trophic.Level))
+
+model_trophic_range <- lm(Range.Size ~ Trophic.Level, data = data_clean)
+summary(model_trophic_range)
+
+ggplot(data_clean, aes(x = Trophic.Level, y = Range.Size)) +
+    geom_jitter()
+
+library(tidymodels)
+
+data$Scavenger <- factor(ifelse(data$Trophic.Level == "Scavenger", "yes", "no"),
+                       levels = c("no", "yes"))
+
+fit_scav <- logistic_reg() %>% 
+  set_engine("glm") %>%
+  fit(Scavenger ~ Range.Size, data = data)
+
+data_pred <- data %>%
+  mutate(.pred_yes = predict(fit_scav, data, type = "prob")$.pred_yes)
+
+data_pred %>%
+  roc_curve(Scavenger, .pred_yes, event_level = "second") %>%
+  autoplot()
+
+data_pred %>%
+  roc_auc(Scavenger, .pred_yes, event_level = "second")
+
+data_pred2 <- data_pred %>%
+  mutate(Scavenger_num = if_else(Scavenger == "yes", 1, 0))
+
+data_pred2 %>%
+  yardstick::rmse(truth = Scavenger_num, estimate = .pred_yes)
+
+data_pred2 %>%
+  yardstick::rsq_trad(truth = Scavenger_num, estimate = .pred_yes)
+
+
+```
+
+#Predictve Modelling
