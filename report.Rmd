@@ -149,8 +149,9 @@ rsq(data_pred1, truth = Latitude, estimate = .pred)
 3. ```Exploring Trophic Level```
 
 \n
-Our further explorations examined whether range size varied across trophic groups.
-A boxplot showed large variance within each trophic category, and our ROC analysis illustrated very low predictive performance (AUC close to 0.5), indicating no usable distinctions between scavengers and other trophic levels based on range size.
+Our further explorations investigated whether the geographic range size of a species could predict whether it belonged to the scavenger trophic category.
+First, we conducted a visual exploration of the Range Size of birds at different trophic levels through the jitter map. The graph shows that there are some differences in the distribution Range of different trophic groups: The Range Size of carnivorous species is larger and more scattered, while herbivores and omnivores usually have a medium-sized and more concentrated distribution range. The range of scavengers is relatively small. Overall, there is a weak correlation between trophic level and Range Size, but it still shows a basic distribution trend. 
+Therefore, it is necessary to further model and analyze its relationship with Range Size. We re-encoded trophic Level as a binary categorical variable to distinguish scavengers ("yes") from non-scavengers ("no"). Then, using Range Size as the only independent variable to construct a logistic regression model. The resulting AUC was 0.8027, indicating that there are certain trend differences among species of different range sizes in terms of whether they are scavengers. RMSE is close to 0, indicating that the predicted probability given by the model is relatively close to the actual classification result. But the R² is close to zero, it indicates that the amount of variation that a single variable can explain is very limited.
 ```{r exploring trophic level, echo=FALSE}
 
 data <- data %>% 
