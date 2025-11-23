@@ -153,7 +153,8 @@ Our further explorations examined whether range size varied across trophic group
 A boxplot showed large variance within each trophic category, and our ROC analysis illustrated very low predictive performance (AUC close to 0.5), indicating no usable distinctions between scavengers and other trophic levels based on range size.
 ```{r exploring trophic level, echo=FALSE}
 
-data$Trophic.Level <- as.factor(data$Trophic.Level)
+data <- data %>% 
+  mutate(Trophic.Level = as.factor(Trophic.Level))
 
 data_clean <- data %>%
     filter(!is.na(Range.Size),
