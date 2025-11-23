@@ -158,7 +158,7 @@ data_test2 <- testing(data_split2)
 
 
 # Construct workflow
-data_rec2 <- recipe(Latitude ~ ., data = data_lat2) %>% 
+data_rec2 <- recipe(Latitude ~ ., data = data_train2) %>% 
   step_naomit(all_predictors()) %>% 
   step_dummy(all_nominal(), -all_outcomes())
 
@@ -166,8 +166,8 @@ data_mod2 <- linear_reg() %>%
   set_engine("lm")
 
 data_wflow2 <- workflow() %>% 
-  add_model(data_mod2) %>% 
-  add_recipe(data_rec2)
+  add_recipe(data_rec2) %>% 
+  add_model(data_mod2)
 
 data_fit2 <- data_wflow2 %>% 
   fit(data = data_train2)
@@ -318,8 +318,6 @@ data_auc <- data_pred2 %>%
   roc_auc(truth = T, .pred_class, event_level = "second")
 
 data_auc
-
-count(data, Trophic.Level)
 ```
 
 ```{r invertivore ~ handwingindex}

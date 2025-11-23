@@ -1,7 +1,7 @@
 ---
-title: "Presentation title"
-subtitle: "Presentation subtitle (if any)"
-author: "Team name <br> Names of team members"
+title: "Investigation on Avonet Bird Dataset"
+subtitle: 
+author: "Pipeline <br> Yupeng Qiu, Naomi Pihlaja, Jiaxi Yan, Jiayi Chen"
 institute: "University of Edinburgh"
 date: "`r Sys.Date()`"
 output:
@@ -31,6 +31,7 @@ library(tidymodels)
 library(palmerpenguins)
 library(knitr)
 library(xaringanthemer)
+xaringanExtra::use_panelset()
 ```
 
 ```{r setup, include=FALSE}
@@ -39,12 +40,10 @@ knitr::opts_chunk$set(fig.retina = 3, dpi = 300, fig.width = 6, fig.asp = 0.618,
 ```
 
 ```{r load-data, include=FALSE}
-# Load your data here
-
+data <- read_csv("data/AVONET3_BirdTree.csv")
 ```
 
 ```{r include=FALSE}
-
 #Background image
 style_xaringan(
   title_slide_background_image = "img/confetti.jpg"
@@ -53,21 +52,142 @@ style_xaringan(
 
 class: center, middle
 
-## A statement of the overall goal / research question
+## Goal of the investigation:
+
+### To predict certain characteristics of birds using their body measurements
 
 ---
 
 class: inverse, center, middle
 
-# Section title
+# Explaining Data Set
 
 ---
 
-# Hello World
+# Variables of Interest
 
-- Click the `Knit` button to compile your presentation
+.pull-left[
+### Categorical Variables
+ - Habitat: Where the birds live
+ - Trophic.Level: Categorized by the bird's food source
+ - Trophic.Niche: More detailed category of trophic level
+]
 
-- Make sure to commit and push all resulting files to your GitHub repo
+.pull-right[
+### Numerical Variables
+ - Beak.Width
+ - Beak.Depth
+ - Centroid.Latitude: The geometric centre of the species range (restricted to breeding and resident range)
+ - Hand-Wing.Index: 100*DK/Lw, where DK is Kipp’s distance and Lw is wing length (i.e., Kipp’s distance corrected for wing size)
+]
+
+---
+
+class: inverse, center, middle
+
+# Starting our investigation:
+
+---
+# Construct a model
+### Predicting Centroid.Latitude using "Range_Size", "Trophic_Level", "Habitat", and "Mass"
+--
+
+###Why?
+We thought the place that the bird live defines the physical factor relate to the bird
+
+---
+# Select Data Needed
+```{r Latitude ~ .}
+# Choose needed data
+data_lat1 <- data %>% 
+  select(Beak.Length_Culmen, 
+         Beak.Length_Nares, 
+         Beak.Depth, 
+         Range.Size, 
+         Habitat, 
+         Mass, 
+         Centroid.Latitude)
+# Modify col names
+colnames(data_lat1) <- c("Beak_length_C", 
+                        "Beak_Length_N", 
+                        "Beak_Depth", 
+                        "Range_Size", 
+                        "Habitat", 
+                        "Mass", 
+                        "Latitude")
+```
+---
+# Construct Workflow
+```{r model Latitude ~ .}
+set.seed(2801)
+data_split1 <- initial_split(data_lat1, 0.8)
+data_train1 <- training(data_split1)
+data_test1 <- testing(data_split1)
+
+
+# Construct workflow
+data_rec1 <- recipe(Latitude ~ ., data = data_train1) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod1 <- linear_reg() %>% 
+  set_engine("lm")
+
+data_wflow1 <- workflow() %>% 
+  add_model(data_mod1) %>% 
+  add_recipe(data_rec1)
+```
+---
+# Fit Data
+```{r fit data Latitude ~ .}
+data_fit1 <- data_wflow1 %>% 
+  fit(data = data_train1)
+# tidy(data_fit1)
+
+data_test1 <- data_test1 %>% 
+  filter(!is.na(Habitat))
+
+data_pred1 <- predict(data_fit1, data_test1) %>% 
+  bind_cols(data_test1) %>% 
+  print(n = 5)
+```
+---
+
+# Test Model Performance
+```{r check model performence Latitude ~ .}
+# Check model performance
+data_train1 <- data_train1 %>% 
+  filter(!is.na(Habitat))
+
+folds1 <- vfold_cv(data_train1, v = 5)
+
+data_fit_rs1 <- data_wflow1 %>% 
+  fit_resamples(folds1)
+collect_metrics(data_fit_rs1)
+```
+---
+
+class: inverse, center, middle
+
+# Why the model does not work?
+
+---
+
+# Plotting Beak width + depth
+```{r Plotting Beak width + depth code, eval=FALSE}
+ggplot(data, aes(x = log(Beak.Width), 
+                 y = log(Beak.Depth), 
+                 color = Centroid.Latitude))+
+         geom_point()
+```
+
+---
+
+# Plotting Beak width + depth
+```{r Plotting Beak width & depth pic, echo=FALSE}
+ggplot(data, aes(x = log(Beak.Width), y = log(Beak.Depth), color = Centroid.Latitude))+
+         geom_point()
+```
 
 ---
 
