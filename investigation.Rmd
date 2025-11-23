@@ -483,5 +483,16 @@ collect_metrics(data_fit_rs1)
 
 rmse(data_pred2, truth = Invertivore_num, estimate = .pred)
 rsq(data_pred2, truth = Invertivore_num, estimate = .pred)
+
+TP<-1047
+TN<-715
+FP<- 586
+FN<- 151
+
+Sensitivity <- TP/(TP+FN) 
+Sensitivity
+
+Specificity <- TN/(TN+FP)
+Specificity
 ```
 ```
