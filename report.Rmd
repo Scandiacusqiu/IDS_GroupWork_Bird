@@ -40,7 +40,7 @@ figshare.com. (n.d.). AVONET: morphological, ecological and geographical data fo
 
 ## Findings
 
-#Introduction
+# Introduction
 
 Bird morphology and ecological traits offer valuable insight into how different species adapt to their environments. The AVONET dataset contains thousands of bird species with measurements of their morphology, habitat, and trophic ecology. This dataset allows us to explore questions regarding correlations of different bird traits, and of potential predictive modelling.
 
@@ -51,7 +51,7 @@ Our analysis investigates two key questions:
 
 These questions were motivated by our hypothesis generated during group discussions, using logical thinking based on our knowledge of biology and animal adaptations based on lifestyle.
 
-#Data Overview
+# Data Overview
 
 Avonet birdtree contains summary statistics on specific characteristics of birds. Many are numerical variables (eg. Beak depth), but some are categorical (eg. Trophic level).Over 10,000 observations allows for a big sample size.
 
@@ -66,7 +66,7 @@ tibble(
 
 
 # Exploratory Statistics
-1. ```Correlation: Beak Width & Beak Depth```
+### 1. Correlation: Beak Width & Beak Depth
 
 \n
 We began by exploring correlations between traits we suspected to be related based on our knowlegde of bird biology. After constructing a scatterplot with a linear model, the line of best fit indicated a strong positive correlation between beak width and beak depth.
@@ -83,39 +83,21 @@ ggplot(data, aes(x=Beak.Width, y=Beak.Depth, color = Centroid.Latitude))+
 
 ```
 
-2. ```Predicting Latitude```
+### 2.Predicting Latitude
 
 \n
-We then attempted to predict centroid latitude using these morphological variables (beak width and length). However, our model showed no meaningful visual correlation- the colours were mixed throughout the plane of the graph. This suggests that latitude of bird habitats do not strongly effect their morphological adaptations.
+We then attempted to predict centroid latitude using these morphological variables (beak width and length). However, our model showed no meaningful visual correlation- the colours were mixed throughout the plane of the graph. This suggests that latitude of bird habitats do not strongly effect their morphological adaptations. The lack of correlation was confirmed by our model, using beak shape to predict latitude:
 ```{r predicting latitude, echo=FALSE}
-# Choose needed data
-data_lat1 <- data %>% 
-  select(Beak.Length_Culmen, 
-         Beak.Length_Nares, 
-         Beak.Depth, 
-         Range.Size, 
-         Habitat, 
-         Mass, 
-         Centroid.Latitude)
-# Modify col names
-colnames(data_lat1) <- c("Beak_length_C", 
-                        "Beak_Length_N", 
-                        "Beak_Depth", 
-                        "Range_Size", 
-                        "Habitat", 
-                        "Mass", 
-                        "Latitude")
-
 
 # Start modelling
 set.seed(2801)
-data_split1 <- initial_split(data_lat1, 0.8)
+data_split1 <- initial_split(data, 0.8)
 data_train1 <- training(data_split1)
 data_test1 <- testing(data_split1)
 
 
 # Construct workflow
-data_rec1 <- recipe(Latitude ~ ., data = data_lat1) %>% 
+data_rec1 <- recipe(Centroid.Latitude ~ Beak.Width + Beak.Depth, data = data) %>% 
   step_naomit(all_predictors()) %>% 
   step_dummy(all_nominal(), -all_outcomes())
 
@@ -134,25 +116,29 @@ data_pred1 <- predict(data_fit1, data_test1) %>%
   bind_cols(data_test1) %>% 
   print(n = 10)
 
+```
 
+\n
+The RMSE of 22.2 suggests an average error of 22.2 when predicting latitude. This is a very high error in the context of latitude, which ranges from -90 to 90. A very low R squared value of 0.002 suggests that the model's predictions is not aligned with the actual data, and that centroid latitude is not explained by beak shape.
+```{r predicting latitude split test, echo=FALSE}
 # Check model performance
 folds1 <- vfold_cv(data_train1, v = 5)
 data_fit_rs1 <- data_wflow1 %>% 
   fit_resamples(folds1)
 collect_metrics(data_fit_rs1)
 
-rmse(data_pred1, truth = Latitude, estimate = .pred)
-rsq(data_pred1, truth = Latitude, estimate = .pred)
 ```
 
 
-3. ```Exploring Trophic Level```
+### 3. Exploring Trophic Level
 
 \n
-Our further explorations investigated whether the geographic range size of a species could predict whether it belonged to the scavenger trophic category.
-First, we conducted a visual exploration of the Range Size of birds at different trophic levels through the jitter map. The graph shows that there are some differences in the distribution Range of different trophic groups: The Range Size of carnivorous species is larger and more scattered, while herbivores and omnivores usually have a medium-sized and more concentrated distribution range. The range of scavengers is relatively small. Overall, there is a weak correlation between trophic level and Range Size, but it still shows a basic distribution trend. 
-Therefore, it is necessary to further model and analyze its relationship with Range Size. We re-encoded trophic Level as a binary categorical variable to distinguish scavengers ("yes") from non-scavengers ("no"). Then, using Range Size as the only independent variable to construct a logistic regression model. The resulting AUC was 0.8027, indicating that there are certain trend differences among species of different range sizes in terms of whether they are scavengers. RMSE is close to 0, indicating that the predicted probability given by the model is relatively close to the actual classification result. But the R² is close to zero, it indicates that the amount of variation that a single variable can explain is very limited.
-```{r exploring trophic level, echo=FALSE}
+Our further explorations investigated whether the geographic range size of a species could predict whether it belonged to the trophic category scavenger.
+
+\n
+First, we conducted a visual exploration of the range Size of birds at different trophic levels via a jitter map. The graph showed that there are some differences in the distribution range of different trophic groups: the range size of carnivorous species is larger and more scattered, while herbivores and omnivores usually have a more medium-sized and more concentrated distribution range. The range of scavengers is relatively small. Overall, there was a weak correlation between trophic level and range size, but it still showed a basic distribution trend. 
+
+```{r exploring trophic level using geom_jitter,  echo=FALSE}
 
 data <- data %>% 
   mutate(Trophic.Level = as.factor(Trophic.Level))
@@ -167,8 +153,13 @@ summary(model_trophic_range)
 ggplot(data_clean, aes(x = Trophic.Level, y = Range.Size)) +
     geom_jitter()
 
-library(tidymodels)
+```
 
+\n
+We then decided to try to use a model to analyse the trophic level variable of scavengers with its relationship with range Size. We re-encoded trophic Level as a binary categorical variable to distinguish scavengers ("yes") from non-scavengers ("no").  
+
+
+```{r exploring trophic level using modelling, echo=FALSE}
 data$Scavenger <- factor(ifelse(data$Trophic.Level == "Scavenger", "yes", "no"),
                        levels = c("no", "yes"))
 
@@ -182,20 +173,233 @@ data_pred <- data %>%
 data_pred %>%
   roc_curve(Scavenger, .pred_yes, event_level = "second") %>%
   autoplot()
+```
 
+\n
+Then, using range size as the only independent variable, we constructed a logistic regression model. The resulting AUC was 0.8027, indicating that there are certain trend differences among species of different range sizes in terms of whether they are scavengers.
+
+```{r exploring trophic level using modelling AUC value, echo=FALSE}
 data_pred %>%
   roc_auc(Scavenger, .pred_yes, event_level = "second")
 
 data_pred2 <- data_pred %>%
   mutate(Scavenger_num = if_else(Scavenger == "yes", 1, 0))
+```
 
+\n
+RMSE is close to 0, indicating that the predicted probability given by the model is relatively close to the actual classification result. But the R² is close to zero, it indicates that the amount of variation that a single variable can explain is very limited.
+
+```{r exploring trophic level using modelling Rsq and RMSE value, echo=FALSE}
 data_pred2 %>%
   yardstick::rmse(truth = Scavenger_num, estimate = .pred_yes)
 
 data_pred2 %>%
   yardstick::rsq_trad(truth = Scavenger_num, estimate = .pred_yes)
+```
 
+\n
+A possible explanation for the limitations of the model could be the very small sample size of scavengers within the data, which was 20.
+
+```{r size of trophic levels, echo= FALSE}
+data %>%
+  count(Trophic.Level, name = "sample_size")
 
 ```
 
-#Predictve Modelling
+
+### 4. Predicting Trophic Niche
+\n
+As we were unsuccessful in predicting trophic level, we moved onto attempting to predict the variable trophic niche, more specifically, whether a bird is an invertivore. We selected hand wing index as a variable and fitted a logistic regression model:
+
+```{r invertivore ~ handwingindex, echo=FALSE}
+
+# Choose needed data
+data_hwi <- data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`) %>% 
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+
+
+# Start modelling
+set.seed(8888)
+data_split1 <- initial_split(data_hwi, 0.8)
+data_train1 <- training(data_split1)
+data_test1 <- testing(data_split1)
+
+
+# Construct workflow
+data_rec1 <- recipe(Invertivore ~ `Hand-Wing.Index`, data = data_train1) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod1 <- logistic_reg() %>% 
+  set_engine("glm")
+
+data_wflow1 <- workflow() %>% 
+  add_model(data_mod1) %>% 
+  add_recipe(data_rec1)
+
+data_fit1 <- data_wflow1 %>% 
+  fit(data = data_train1)
+# tidy(data_fit)
+
+data_pred1 <- predict(data_fit1, data_test1, type = "prob") %>% 
+  bind_cols(data_test1) %>% 
+  print(n = 10)
+```
+
+\n
+We then checked the model performance, which revealed a relatively high AUC of 0.73, but a low R² value of 0.12, which suggested the model was too simple.
+
+```{r check model performence, echo=FALSE}
+cut_off_prob <- 0.45
+data_pred1 <- data_pred1 %>% 
+  mutate(Invertivore_fac = factor(Invertivore), 
+         Invertivore_num = as.numeric(Invertivore), 
+         .pred = case_when(.pred_1 > cut_off_prob ~ 1, 
+                           TRUE ~ 0))
+
+data_pred1 %>% 
+  mutate(
+    response = if_else(Invertivore == "1", "Invertivore", "Not Invertivore"), 
+    Invertivore_pred = if_else(.pred_1 >= cut_off_prob, "Predicted Invertivore", "Predicted Not Invertivore")
+  )  %>% 
+  count(response, Invertivore_pred) %>% 
+  pivot_wider(names_from = Invertivore_pred, values_from = n)
+
+data_pred1 %>%
+  roc_curve(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+data_pred1 %>%
+  roc_auc(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  )
+
+
+folds1 <- vfold_cv(data_train1, v = 5)
+data_fit_rs1 <- data_wflow1 %>% 
+  fit_resamples(folds1)
+collect_metrics(data_fit_rs1)
+
+rmse(data_pred1, truth = Invertivore_num, estimate = .pred)
+rsq(data_pred1, truth = Invertivore_num, estimate = .pred)
+```
+
+### 5. Improving our prediction on Trophic Niche
+\n 
+In order to improve on the simplicity of the model and increase the R² value, we added a new variable, ```mass```, to the model. We came to the decision to add this as our variable after constructing a ```geom_jitter()``` plot which visually suggested some correlation between trophic niche and mass:
+
+```{r find mass could be a predictor as well, echo=FALSE}
+data %>%
+  ggplot(aes(x = log(Mass), y = Trophic.Niche)) +
+  geom_jitter()
+```
+
+\n
+We then fitted a model to our chosen variables:
+
+```{r invertivore ~ handwingindex + Mass, echo=FALSE}
+# Choose needed data
+data_hwi2 <- data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>% 
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+
+
+# Start modelling
+set.seed(8888)
+data_split2 <- initial_split(data_hwi2)
+data_train2 <- training(data_split2)
+data_test2 <- testing(data_split2)
+
+
+# Construct workflow
+data_rec2 <- recipe(Invertivore ~ `Hand-Wing.Index` + Mass, data = data_train2) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod2 <- logistic_reg() %>% 
+  set_engine("glm")
+
+data_wflow2 <- workflow() %>% 
+  add_model(data_mod2) %>% 
+  add_recipe(data_rec2)
+
+data_fit2 <- data_wflow2 %>% 
+  fit(data = data_train2)
+# tidy(data_fit)
+
+data_pred2 <- predict(data_fit2, data_test2, type = "prob") %>% 
+  bind_cols(data_test2) %>% 
+  print(n = 10)
+```
+
+\n
+We then tested our model's performance:
+
+```{r check model performence for trophic niche, echo=FALSE}
+cut_off_prob <- 0.45
+data_pred2 <- data_pred2 %>% 
+  mutate(Invertivore_fac = factor(Invertivore), 
+         Invertivore_num = as.numeric(Invertivore), 
+         .pred = case_when(.pred_1 > cut_off_prob ~ 1, 
+                           TRUE ~ 0))
+
+data_pred2 %>% 
+  mutate(
+    response = if_else(Invertivore == "1", "Invertivore", "Not Invertivore"), 
+    Invertivore_pred = if_else(.pred_1 >= cut_off_prob, "Predicted Invertivore", "Predicted Not Invertivore")
+  )  %>% 
+  count(response, Invertivore_pred) %>% 
+  pivot_wider(names_from = Invertivore_pred, values_from = n)
+
+data_pred2 %>%
+  roc_curve(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+data_pred2 %>%
+  roc_auc(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  )
+
+
+folds1 <- vfold_cv(data_train2, v = 5)
+data_fit_rs2 <- data_wflow2 %>% 
+  fit_resamples(folds1)
+collect_metrics(data_fit_rs1)
+
+rmse(data_pred2, truth = Invertivore_num, estimate = .pred)
+rsq(data_pred2, truth = Invertivore_num, estimate = .pred)
+
+TP<-1047
+TN<-715
+FP<- 586
+FN<- 151
+
+Sensitivity <- TP/(TP+FN) 
+Sensitivity
+
+Specificity <- TN/(TN+FP)
+Specificity
+```
+\n
+Adding mass as a variable increased our R² value from 0.12 to 0.20, which shows improvement on the fitting of the model. The AUC also increased from 0.73 to 0.79, which also suggests an improvement on the model's ability to predict whether a bird is an invertivore. Yet the RMSE value is quite high (0.54) which still suggests high error and poor model performance.
+
+# Conclusion
+
+Our analyses suggests that while intuitively, beak shapes would be indicative of habitats and diets of birds due to feeding mechanics and ecological niches, these are not effective explanatory variables based on the models we have created, as they have relatively low AUC values. An AUC value of 0.79 suggests however, that handwingindex and mass are suitable explanatory variables in predicting whether a bird is an invertivore. However a high RMSE value of 0.54 suggests a high error for our model, as we are modelling from values 0 to 1 (probability).
+
+
