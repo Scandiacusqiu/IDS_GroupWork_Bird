@@ -86,36 +86,18 @@ ggplot(data, aes(x=Beak.Width, y=Beak.Depth, color = Centroid.Latitude))+
 ### 2.Predicting Latitude
 
 \n
-We then attempted to predict centroid latitude using these morphological variables (beak width and length). However, our model showed no meaningful visual correlation- the colours were mixed throughout the plane of the graph. This suggests that latitude of bird habitats do not strongly effect their morphological adaptations.
+We then attempted to predict centroid latitude using these morphological variables (beak width and length). However, our model showed no meaningful visual correlation- the colours were mixed throughout the plane of the graph. This suggests that latitude of bird habitats do not strongly effect their morphological adaptations. The lack of correlation was confirmed by our model, using beak shape to predict latitude:
 ```{r predicting latitude, echo=FALSE}
-# Choose needed data
-data_lat1 <- data %>% 
-  select(Beak.Length_Culmen, 
-         Beak.Length_Nares, 
-         Beak.Depth, 
-         Range.Size, 
-         Habitat, 
-         Mass, 
-         Centroid.Latitude)
-# Modify col names
-colnames(data_lat1) <- c("Beak_length_C", 
-                        "Beak_Length_N", 
-                        "Beak_Depth", 
-                        "Range_Size", 
-                        "Habitat", 
-                        "Mass", 
-                        "Latitude")
-
 
 # Start modelling
 set.seed(2801)
-data_split1 <- initial_split(data_lat1, 0.8)
+data_split1 <- initial_split(data, 0.8)
 data_train1 <- training(data_split1)
 data_test1 <- testing(data_split1)
 
 
 # Construct workflow
-data_rec1 <- recipe(Latitude ~ ., data = data_lat1) %>% 
+data_rec1 <- recipe(Centroid.Latitude ~ Beak.Width + Beak.Depth, data = data) %>% 
   step_naomit(all_predictors()) %>% 
   step_dummy(all_nominal(), -all_outcomes())
 
@@ -134,15 +116,17 @@ data_pred1 <- predict(data_fit1, data_test1) %>%
   bind_cols(data_test1) %>% 
   print(n = 10)
 
+```
 
+\n
+The RMSE of 22.2 suggests an average error of 22.2 when predicting latitude. This is a very high error in the context of latitude, which ranges from -90 to 90. A very low R squared value of 0.002 suggests that the model's predictions is not aligned with the actual data, and that centroid latitude is not explained by beak shape.
+```{r predicting latitude split test, echo=FALSE}
 # Check model performance
 folds1 <- vfold_cv(data_train1, v = 5)
 data_fit_rs1 <- data_wflow1 %>% 
   fit_resamples(folds1)
 collect_metrics(data_fit_rs1)
 
-rmse(data_pred1, truth = Latitude, estimate = .pred)
-rsq(data_pred1, truth = Latitude, estimate = .pred)
 ```
 
 
@@ -154,12 +138,7 @@ Our further explorations investigated whether the geographic range size of a spe
 \n
 First, we conducted a visual exploration of the range Size of birds at different trophic levels via a jitter map. The graph showed that there are some differences in the distribution range of different trophic groups: the range size of carnivorous species is larger and more scattered, while herbivores and omnivores usually have a more medium-sized and more concentrated distribution range. The range of scavengers is relatively small. Overall, there was a weak correlation between trophic level and range size, but it still showed a basic distribution trend. 
 
-\n
-We then decided to try to use a model to analyse the trophic level variable of scavengers with its relationship with range Size. We re-encoded trophic Level as a binary categorical variable to distinguish scavengers ("yes") from non-scavengers ("no"). Then, using range size as the only independent variable, we constructed a logistic regression model. The resulting AUC was 0.8027, indicating that there are certain trend differences among species of different range sizes in terms of whether they are scavengers. RMSE is close to 0, indicating that the predicted probability given by the model is relatively close to the actual classification result. But the R² is close to zero, it indicates that the amount of variation that a single variable can explain is very limited.
-
-\n
-A possible explanation for the limitations of the model could be the very small sample size of scavengers within the data, which was 20.
-```{r exploring trophic level, echo=FALSE}
+```{r exploring trophic level using geom_jitter,  echo=FALSE}
 
 data <- data %>% 
   mutate(Trophic.Level = as.factor(Trophic.Level))
@@ -174,8 +153,13 @@ summary(model_trophic_range)
 ggplot(data_clean, aes(x = Trophic.Level, y = Range.Size)) +
     geom_jitter()
 
-library(tidymodels)
+```
 
+\n
+We then decided to try to use a model to analyse the trophic level variable of scavengers with its relationship with range Size. We re-encoded trophic Level as a binary categorical variable to distinguish scavengers ("yes") from non-scavengers ("no").  
+
+
+```{r exploring trophic level using modelling, echo=FALSE}
 data$Scavenger <- factor(ifelse(data$Trophic.Level == "Scavenger", "yes", "no"),
                        levels = c("no", "yes"))
 
@@ -189,22 +173,36 @@ data_pred <- data %>%
 data_pred %>%
   roc_curve(Scavenger, .pred_yes, event_level = "second") %>%
   autoplot()
+```
 
+\n
+Then, using range size as the only independent variable, we constructed a logistic regression model. The resulting AUC was 0.8027, indicating that there are certain trend differences among species of different range sizes in terms of whether they are scavengers.
+
+```{r exploring trophic level using modelling AUC value, echo=FALSE}
 data_pred %>%
   roc_auc(Scavenger, .pred_yes, event_level = "second")
 
 data_pred2 <- data_pred %>%
   mutate(Scavenger_num = if_else(Scavenger == "yes", 1, 0))
+```
 
+\n
+RMSE is close to 0, indicating that the predicted probability given by the model is relatively close to the actual classification result. But the R² is close to zero, it indicates that the amount of variation that a single variable can explain is very limited.
+
+```{r exploring trophic level using modelling Rsq and RMSE value, echo=FALSE}
 data_pred2 %>%
   yardstick::rmse(truth = Scavenger_num, estimate = .pred_yes)
 
 data_pred2 %>%
   yardstick::rsq_trad(truth = Scavenger_num, estimate = .pred_yes)
+```
 
+\n
+A possible explanation for the limitations of the model could be the very small sample size of scavengers within the data, which was 20.
+
+```{r size of trophic levels, echo= FALSE}
 data %>%
   count(Trophic.Level, name = "sample_size")
-
 
 ```
 
