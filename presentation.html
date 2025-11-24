@@ -4,7 +4,7 @@
     <title>Investigation on Avonet Bird Dataset</title>
     <meta charset="utf-8" />
     <meta name="author" content="Pipeline   Yupeng Qiu, Naomi Pihlaja, Jiaxi Yan, Jiayi Chen" />
-    <meta name="date" content="2025-11-23" />
+    <meta name="date" content="2025-11-24" />
     <script src="libs/header-attrs-2.29/header-attrs.js"></script>
     <link href="libs/panelset-0.3.0/panelset.css" rel="stylesheet" />
     <script src="libs/panelset-0.3.0/panelset.js"></script>
@@ -24,7 +24,7 @@ class: center, middle, inverse, title-slide
 ### University of Edinburgh
 ]
 .date[
-### 2025-11-23
+### 2025-11-24
 ]
 
 ---
@@ -47,13 +47,17 @@ class: center, middle
 
 ### To predict certain characteristics of birds using their body measurements
 
+
 ---
+
 
 class: inverse, center, middle
 
 # Explaining Data Set
 
+
 ---
+
 
 # Variables of Interest
 
@@ -72,43 +76,107 @@ class: inverse, center, middle
  - Hand-Wing.Index: 100*DK/Lw, where DK is Kipp’s distance and Lw is wing length (i.e., Kipp’s distance corrected for wing size)
 ]
 
+
 ---
+
 
 class: inverse, center, middle
 
 # Starting our investigation:
 
+
 ---
+
+
 # Construct a model
 ### Predicting Centroid.Latitude using "Range_Size", "Trophic_Level", "Habitat", and "Mass"
+
+
 --
+
 
 ###Why?
 We thought the place that the bird live defines the physical factor relate to the bird
 
----
-# Select Data Needed
 
-``` r
-# Choose needed data
-data_lat1 &lt;- data %&gt;% 
-  select(Beak.Length_Culmen, 
-         Beak.Length_Nares, 
-         Beak.Depth, 
-         Range.Size, 
-         Habitat, 
-         Mass, 
-         Centroid.Latitude)
-# Modify col names
-colnames(data_lat1) &lt;- c("Beak_length_C", 
-                        "Beak_Length_N", 
-                        "Beak_Depth", 
-                        "Range_Size", 
-                        "Habitat", 
-                        "Mass", 
-                        "Latitude")
-```
 ---
+
+
+# Select Data Needed
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; Beak_length_C &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Beak_Length_N &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Beak_Depth &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Range_Size &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Habitat &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mass &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Latitude &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 27.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 17.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37461.21 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Forest &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 248.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -8.15 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 20.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22374973.00 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Shrubland &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 131.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.23 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 26.5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13.5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Woodland &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 287.5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 22.5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 35580.71 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Forest &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 142.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -5.45 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 21.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2936751.80 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Forest &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 186.5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 45.24 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 20.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 327.84 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Forest &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 122.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.42 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+
+
 # Construct Workflow
 
 ``` r
@@ -130,21 +198,12 @@ data_wflow1 &lt;- workflow() %&gt;%
   add_model(data_mod1) %&gt;% 
   add_recipe(data_rec1)
 ```
+
+
 ---
+
+
 # Fit Data
-
-``` r
-data_fit1 &lt;- data_wflow1 %&gt;% 
-  fit(data = data_train1)
-# tidy(data_fit1)
-
-data_test1 &lt;- data_test1 %&gt;% 
-  filter(!is.na(Habitat))
-
-data_pred1 &lt;- predict(data_fit1, data_test1) %&gt;% 
-  bind_cols(data_test1) %&gt;% 
-  print(n = 5)
-```
 
 ```
 ## # A tibble: 1,989 × 8
@@ -157,21 +216,8 @@ data_pred1 &lt;- predict(data_fit1, data_test1) %&gt;%
 ## 5  1.32          27.9          15.9       13.6     22782. Forest   359.     0.88
 ## # ℹ 1,984 more rows
 ```
----
 
 # Test Model Performance
-
-``` r
-# Check model performance
-data_train1 &lt;- data_train1 %&gt;% 
-  filter(!is.na(Habitat))
-
-folds1 &lt;- vfold_cv(data_train1, v = 5)
-
-data_fit_rs1 &lt;- data_wflow1 %&gt;% 
-  fit_resamples(folds1)
-collect_metrics(data_fit_rs1)
-```
 
 ```
 ## # A tibble: 2 × 6
@@ -180,228 +226,474 @@ collect_metrics(data_fit_rs1)
 ## 1 rmse    standard   22.2        5 0.132   pre0_mod0_post0
 ## 2 rsq     standard    0.0263     5 0.00604 pre0_mod0_post0
 ```
+
+
 ---
+
 
 class: inverse, center, middle
 
 # Why the model does not work?
 
----
-
-# Plotting Beak width + depth
-
-``` r
-ggplot(data, aes(x = log(Beak.Width), 
-                 y = log(Beak.Depth), 
-                 color = Centroid.Latitude))+
-         geom_point()
-```
 
 ---
 
-# Plotting Beak width + depth
+
+### Plotting Beak width + depth
 &lt;img src="presentation_files/figure-html/Plotting Beak width &amp; depth pic-1.png" width="80%" /&gt;
 
+
 ---
+
 
 class: inverse, middle, center
 
-# Using xaringan
+# Investigation on Trophic.Niche
+
 
 ---
 
-# xaringan
 
-- The presentation is created using the `xaringan` package
-
-- Use `---` to separate slides and `--` for incremental builds
-
---
-
-- Like this
-
----
-
-# Layouts
-
-You can use plain text
-
-- or bullet points
-
+# Looking at data
 .pull-left[
-or text in two columns `\(^*\)`
-]
-.pull-right[
-- like
-- this
-]
-
-.footnote[
-[*] And add footnotes
-]
-
----
-
-# Code
-
-
-``` r
-# a boring regression
-model &lt;- lm(dist ~ speed, data = cars)
-tidy(model)
-```
-
-```
-## # A tibble: 2 × 5
-##   term        estimate std.error statistic  p.value
-##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1 (Intercept)   -17.6      6.76      -2.60 1.23e- 2
-## 2 speed           3.93     0.416      9.46 1.49e-12
-```
-
-``` r
-glance(model)
-```
-
-```
-## # A tibble: 1 × 12
-##   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC
-##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1     0.651         0.644  15.4      89.6 1.49e-12     1  -207.  419.  425.
-## # ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;
-```
-
----
-
-# Plots
-
-
-
-&lt;img src="presentation_files/figure-html/plot-iris-1.png" width="80%" /&gt;
-
----
-
-## Plot and text
-
-.pull-left[
-- Some text
-- goes here
-]
-.pull-right[
-&lt;img src="presentation_files/figure-html/unnamed-chunk-2-1.png" width="100%" /&gt;
-]
-
----
-
-# Tables
-
-If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
-
 &lt;table&gt;
  &lt;thead&gt;
   &lt;tr&gt;
-   &lt;th style="text-align:right;"&gt; Sepal.Length &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Sepal.Width &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Petal.Length &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Petal.Width &lt;/th&gt;
-   &lt;th style="text-align:left;"&gt; Species &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Trophic.Niche &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 5.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.5 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Aquatic predator &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 757 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 4.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.0 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Frugivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1030 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 4.7 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.2 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.3 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Granivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 664 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 4.6 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.5 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Herbivore aquatic &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 82 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 5.0 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.6 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Herbivore terrestrial &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 93 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 5.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.7 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.4 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4780 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nectarivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 507 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Omnivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1737 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Scavenger &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Vertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 312 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-right[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Trophic.Niche &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mean_mass &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mean_hwi &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Aquatic predator &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 927.714 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43.553 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Frugivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 356.395 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 23.002 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Granivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 63.930 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24.873 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Herbivore aquatic &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1440.574 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43.283 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Herbivore terrestrial &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1176.938 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 34.677 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 49.901 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.419 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nectarivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14.200 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 49.655 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Omnivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 431.699 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24.488 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Scavenger &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5274.600 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37.073 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Vertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 751.994 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 33.538 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+---
+
+
+# Modelling
+
+``` r
+# Convert Trophic.Niche into Binomial output
+data_hwi2 &lt;- data %&gt;% 
+  select(Trophic.Niche, `Hand-Wing.Index`, Mass) %&gt;%
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+```
+
+
+---
+
+
+# Making Prediction
+
+```
+## # A tibble: 1,999 × 5
+##    .pred_0 .pred_1 Trophic.Niche    `Hand-Wing.Index` Invertivore
+##      &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                        &lt;dbl&gt; &lt;chr&gt;      
+##  1   0.637   0.363 Vertivore                     33.9 0          
+##  2   0.577   0.423 Vertivore                     29   0          
+##  3   0.603   0.397 Vertivore                     31.1 0          
+##  4   0.551   0.449 Vertivore                     27   0          
+##  5   0.589   0.411 Vertivore                     30   0          
+##  6   0.686   0.314 Vertivore                     38.1 0          
+##  7   0.517   0.483 Vertivore                     24.4 0          
+##  8   0.704   0.296 Vertivore                     39.7 0          
+##  9   0.684   0.316 Vertivore                     37.9 0          
+## 10   0.639   0.361 Vertivore                     34   0          
+## 11   0.654   0.346 Invertivore                   35.3 1          
+## 12   0.551   0.449 Aquatic predator              27   0          
+## 13   0.648   0.352 Vertivore                     34.8 0          
+## 14   0.640   0.360 Vertivore                     34.1 0          
+## 15   0.631   0.369 Vertivore                     33.4 0          
+## # ℹ 1,984 more rows
+```
+
+
+---
+
+
+# Evaluate Model Performance
+&lt;img src="presentation_files/figure-html/modelling13-1.png" width="80%" /&gt;
+
+
+---
+
+
+# Evaluate Model Performance
+
+``` r
+cut_off_prob &lt;- 0.45
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; response &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predicted Invertivore &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predicted Not Invertivore &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 798 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 161 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Not Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 511 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 529 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 
+Sensitivity = 0.832
+
+Specificity = 0.509
+
+
 ---
 
-# Images
 
-&lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="img/edinburgh-castle.jpg" alt="Image credit: Photo by Jörg Angeli on Unsplash." width="55%" /&gt;
-&lt;p class="caption"&gt;Image credit: Photo by Jörg Angeli on Unsplash.&lt;/p&gt;
-&lt;/div&gt;
+# Evaluate Model Performance
+.pull-left[
 
-Or you can also include a full page image. See next slide.
+``` r
+cut_off_prob &lt;- 0.45
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; .metric &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; .estimator &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .estimate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; roc_auc &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; binary &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.73 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-right[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; .metric &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; .estimator &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .estimate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; rmse &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; standard &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.58 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; .metric &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; .estimator &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .estimate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; rsq &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; standard &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.128 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+---
+
+
+class: inverse, middle, center
+
+# Improving model by adding mass as a predictor
+
+
+---
+
+
+# Making Prediction
+
+```
+## # A tibble: 2,499 × 6
+##    .pred_0       .pred_1 Trophic.Niche `Hand-Wing.Index`  Mass Invertivore
+##      &lt;dbl&gt;         &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      
+##  1   0.760 0.240         Vertivore                  33.9  249. 0          
+##  2   0.629 0.371         Vertivore                  32.7  131. 0          
+##  3   0.587 0.413         Vertivore                  29    125  0          
+##  4   0.828 0.172         Vertivore                  31.1  359. 0          
+##  5   0.991 0.00855       Vertivore                  27   1050  0          
+##  6   0.797 0.203         Vertivore                  30    326. 0          
+##  7   0.745 0.255         Vertivore                  38.1  198  0          
+##  8   0.683 0.317         Vertivore                  24.4  249. 0          
+##  9   0.562 0.438         Vertivore                  27.4  117  0          
+## 10   1.000 0.000000500   Vertivore                  39.7 2958  0          
+## 11   0.991 0.00854       Vertivore                  27.4 1047  0          
+## 12   1.000 0.0000000463  Vertivore                  39.6 3450. 0          
+## 13   1.000 0.0000264     Vertivore                  37.9 2154. 0          
+## 14   1.000 0.0000172     Vertivore                  38.7 2236. 0          
+## 15   1.000 0.00000000157 Vertivore                  34   4195  0          
+## # ℹ 2,484 more rows
+```
+
+
+---
+
+
+# Evaluate Model Performance
+&lt;img src="presentation_files/figure-html/Evaluate Model2-1.png" width="80%" /&gt;
+
+
+---
+
+
+# Evaluate Model Performance
+
+``` r
+cut_off_prob &lt;- 0.45
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; response &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predicted Invertivore &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predicted Not Invertivore &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1047 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 151 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Not Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 586 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 715 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+Sensitivity = 0.874
+
+Specificity = 0.55
+
+---
+
+
+# Evaluate Model Performance
+.pull-left[
+
+``` r
+cut_off_prob &lt;- 0.45
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; .metric &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; .estimator &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .estimate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; roc_auc &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; binary &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.789 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-right[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; .metric &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; .estimator &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .estimate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; rmse &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; standard &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.543 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; .metric &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; .estimator &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .estimate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; rsq &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; standard &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.198 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
 
 ---
 
 
 class: inverse, center, middle
-background-image: url(img/edinburgh-castle.jpg)
-background-size: contain
----
 
-# Math Expressions
+# Why does the model not work?
 
-You can write LaTeX math expressions inside a pair of dollar signs, e.g. &amp;#36;\alpha+\beta$ renders `\(\alpha+\beta\)`. You can use the display style with double dollar signs:
-
-```
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-```
-
-`$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$`
-
-Limitations:
-
-1. The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character;
-
-1. There should not be spaces after the opening `$` or before the closing `$`.
-
-1. Math does not work on the title slide (see [#61](https://github.com/yihui/xaringan/issues/61) for a workaround).
 
 ---
 
-# Feeling adventurous?
 
-- Want to find out more about `xaringan`? See https://slides.yihui.name/xaringan/#1.
+### Plot out the data
+&lt;img src="presentation_files/figure-html/plot trophic.niche-1.png" width="80%" /&gt;
 
-- You are welcome to use the default styling of the slides. In fact, that's what I expect majority of you will do. You will differentiate yourself with the content of your presentation.
 
-- But some of you might want to play around with slide styling. The 
-`xaringanthemer` provides some solutions for this that: https://pkg.garrickadenbuie.com/xaringanthemer.
+---
 
-- And if you want more bells and whistles, there is also `xaringanExtra`: https://pkg.garrickadenbuie.com/xaringanExtra.
+
+class: inverse, center, middle
+
+# Thanks for listening!
+
+
+---
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

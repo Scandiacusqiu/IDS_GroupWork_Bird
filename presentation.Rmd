@@ -56,13 +56,17 @@ class: center, middle
 
 ### To predict certain characteristics of birds using their body measurements
 
+
 ---
+
 
 class: inverse, center, middle
 
 # Explaining Data Set
 
+
 ---
+
 
 # Variables of Interest
 
@@ -81,21 +85,32 @@ class: inverse, center, middle
  - Hand-Wing.Index: 100*DK/Lw, where DK is Kipp’s distance and Lw is wing length (i.e., Kipp’s distance corrected for wing size)
 ]
 
+
 ---
+
 
 class: inverse, center, middle
 
 # Starting our investigation:
 
+
 ---
+
+
 # Construct a model
 ### Predicting Centroid.Latitude using "Range_Size", "Trophic_Level", "Habitat", and "Mass"
+
+
 --
+
 
 ###Why?
 We thought the place that the bird live defines the physical factor relate to the bird
 
+
 ---
+
+
 # Select Data Needed
 ```{r Latitude ~ ., echo=FALSE}
 # Choose needed data
@@ -116,9 +131,13 @@ colnames(data_lat1) <- c("Beak_length_C",
                         "Mass", 
                         "Latitude")
 
-data_lat1
+kable(head(data_lat1), format = 'html')
 ```
+
+
 ---
+
+
 # Construct Workflow
 ```{r model Latitude ~ .}
 set.seed(2801)
@@ -139,7 +158,11 @@ data_wflow1 <- workflow() %>%
   add_model(data_mod1) %>% 
   add_recipe(data_rec1)
 ```
+
+
 ---
+
+
 # Fit Data
 ```{r fit data Latitude ~ ., echo=FALSE}
 data_fit1 <- data_wflow1 %>% 
@@ -166,18 +189,25 @@ data_fit_rs1 <- data_wflow1 %>%
   fit_resamples(folds1)
 collect_metrics(data_fit_rs1)
 ```
+
+
 ---
+
 
 class: inverse, center, middle
 
 # Why the model does not work?
 
+
 ---
+
+
 ### Plotting Beak width + depth
 ```{r Plotting Beak width & depth pic, echo=FALSE}
 ggplot(data, aes(x = log(Beak.Width), y = log(Beak.Depth), color = Centroid.Latitude))+
-         geom_point()
+         geom_jitter(alpha = 0.3)
 ```
+
 
 ---
 
@@ -186,25 +216,35 @@ class: inverse, middle, center
 
 # Investigation on Trophic.Niche
 
+
 ---
+
+
 # Looking at data
 .pull-left[
 ```{r looking at data1, echo=FALSE}
 data %>% 
   select(Trophic.Niche, Mass, `Hand-Wing.Index`) %>% 
-  count(Trophic.Niche)
+  count(Trophic.Niche) %>% 
+  kable(format = 'html')
 ```
 ]
+
 .pull-right[
-```{r looking at data2}
+```{r looking at data2, echo=FALSE}
 data %>% 
   select(Trophic.Niche, Mass, `Hand-Wing.Index`) %>% 
   filter(!is.na(Trophic.Niche)) %>% 
   group_by(Trophic.Niche) %>% 
-  summarise(mean_mass = mean(Mass), mean_hwi = mean(`Hand-Wing.Index`))
+  summarise(mean_mass = mean(Mass), mean_hwi = mean(`Hand-Wing.Index`)) %>% 
+  kable(format = 'html', digits = 3)
 ```
 ]
+
+
 ---
+
+
 # Modelling
 ```{r modelling1, eval=FALSE}
 # Convert Trophic.Niche into Binomial output
@@ -213,8 +253,12 @@ data_hwi2 <- data %>%
   mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
                        TRUE ~ "0"))
 ```
+
+
 ---
-# Modelling
+
+
+# Making Prediction
 ```{r modelling 11, echo=FALSE}
 # Choose needed data
 data_hwi <- data %>% 
@@ -248,9 +292,13 @@ data_fit1 <- data_wflow1 %>%
 
 data_pred1 <- predict(data_fit1, data_test1, type = "prob") %>% 
   bind_cols(data_test1) %>% 
-  print(n = 10)
+  print(n = 15)
 ```
+
+
 ---
+
+
 # Evaluate Model Performance
 ```{r modelling13, echo=FALSE}
 cut_off_prob <- 0.45
@@ -268,25 +316,11 @@ data_pred1 %>%
   ) %>%
   autoplot()
 ```
+
+
 ---
-# Evaluate Model Performance
-.pull-left[
-```{r modelling14, echo=FALSE}
-data_pred1 %>%
-  roc_auc(
-    truth = Invertivore_fac,
-    .pred_1,
-    event_level = "second"
-  )
-```
-]
-.pull-right[
-```{r modelling15, echo=FALSE}
-rmse(data_pred1, truth = Invertivore_num, estimate = .pred)
-rsq(data_pred1, truth = Invertivore_num, estimate = .pred)
-```
-]
----
+
+
 # Evaluate Model Performance
 ```{r modelling12}
 cut_off_prob <- 0.45
@@ -299,14 +333,62 @@ data_pred1 %>%
     Invertivore_pred = if_else(.pred_1 >= cut_off_prob, "Predicted Invertivore", "Predicted Not Invertivore")
   )  %>% 
   count(response, Invertivore_pred) %>% 
-  pivot_wider(names_from = Invertivore_pred, values_from = n)
+  pivot_wider(names_from = Invertivore_pred, values_from = n) %>% 
+  kable(format = 'html')
+
+TP <- 798
+TN <- 529
+FP <- 511
+FN <- 161
+Sensitivity <- TP/(TP+FN)
+Specificity <- TN/(TN+FP)
 ```
+
+Sensitivity = `r round(Sensitivity, 3)`
+
+Specificity = `r round(Specificity, 3)`
+
+
 ---
+
+
+# Evaluate Model Performance
+.pull-left[
+```{r modelling 17}
+cut_off_prob <- 0.45
+```
+
+```{r modelling14, echo=FALSE}
+data_pred1 %>%
+  roc_auc(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  kable(format = 'html', digits = 3)
+```
+]
+
+.pull-right[
+```{r modelling15, echo=FALSE}
+rmse(data_pred1, truth = Invertivore_num, estimate = .pred) %>% kable(format = 'html', digits = 3)
+rsq(data_pred1, truth = Invertivore_num, estimate = .pred) %>% kable(format = 'html', digits = 3)
+```
+]
+
+
+---
+
+
 class: inverse, middle, center
 
 # Improving model by adding mass as a predictor
+
+
 ---
-# Modelling
+
+
+# Making Prediction
 ```{r modelling2, echo=FALSE}
 data_hwi2 <- data %>% 
   select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>%
@@ -330,14 +412,20 @@ data_wflow2 <- workflow() %>%
   add_model(data_mod2) %>% 
   add_recipe(data_rec2)
 
+suppressWarnings(
 data_fit2 <- data_wflow2 %>% 
   fit(data = data_train2)
+)
 
 data_pred2 <- predict(data_fit2, data_test2, type = "prob") %>% 
   bind_cols(data_test2) %>% 
-  print(n = 10)
+  print(n = 15)
 ```
+
+
 ---
+
+
 # Evaluate Model Performance
 ```{r Evaluate Model2, echo=FALSE}
 data_pred2 <- data_pred2 %>% 
@@ -354,26 +442,11 @@ data_pred2 %>%
   ) %>%
   autoplot()
 ```
----
-# Evaluate Model Performance
-.pull-left[
-```{r Evaluate Model3, echo=FALSE}
-data_pred2 %>%
-  roc_auc(
-    truth = Invertivore_fac,
-    .pred_1,
-    event_level = "second"
-  )
-```
-]
 
-.pull-right[
-```{r Evaluate Model5, echo=FALSE}
-rmse(data_pred2, truth = Invertivore_num, estimate = .pred)
-rsq(data_pred2, truth = Invertivore_num, estimate = .pred)
-```
-]
+
 ---
+
+
 # Evaluate Model Performance
 ```{r Evaluate Model1}
 cut_off_prob <- 0.45
@@ -386,179 +459,76 @@ data_pred2 %>%
     Invertivore_pred = if_else(.pred_1 >= cut_off_prob, "Predicted Invertivore", "Predicted Not Invertivore")
   )  %>% 
   count(response, Invertivore_pred) %>% 
-  pivot_wider(names_from = Invertivore_pred, values_from = n)
+  pivot_wider(names_from = Invertivore_pred, values_from = n) %>% 
+  kable(format = 'html')
 
-TP<-1047
-TN<-715
-FP<- 586
-FN<- 151
-
+TP <- 1047
+TN <- 715
+FP <- 586
+FN <- 151
 Sensitivity <- TP/(TP+FN)
-print("Sensitivity = ")
-Sensitivity
-
 Specificity <- TN/(TN+FP)
-print("Specificity = ")
-Specificity
 ```
+
+Sensitivity = `r round(Sensitivity, 3)`
+
+Specificity = `r round(Specificity, 3)`
+
 ---
+
+
+# Evaluate Model Performance
+.pull-left[
+```{r Evaluate Model7}
+cut_off_prob <- 0.45
+```
+
+```{r Evaluate Model3, echo=FALSE}
+data_pred2 %>%
+  roc_auc(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>% 
+  kable(format = 'html', digits = 3)
+```
+]
+
+.pull-right[
+```{r Evaluate Model5, echo=FALSE}
+rmse(data_pred2, truth = Invertivore_num, estimate = .pred) %>% kable(format = 'html', digits = 3)
+rsq(data_pred2, truth = Invertivore_num, estimate = .pred) %>% kable(format = 'html', digits = 3)
+```
+]
+
+
+---
+
+
 class: inverse, center, middle
 
-# Why model does not work?
+# Why does the model not work?
+
+
 ---
+
+
 ### Plot out the data
 ```{r plot trophic.niche, echo=FALSE}
 data %>% 
-  mutate(yn = case_when(Trophic.Niche == "Invertivore" ~ "y", TRUE ~ "n")) %>% 
-  ggplot(aes(x = `Hand-Wing.Index`, y = log(Mass), color = yn)) + 
+  mutate(IN = case_when(Trophic.Niche == "Invertivore" ~ "Invertivore", TRUE ~ "Not Invertivore")) %>% 
+  ggplot(aes(x = `Hand-Wing.Index`, y = log(Mass), color = IN)) + 
   geom_jitter(alpha = 0.3) + 
-  labs(x = "Hand-Wing Index", y = "mass(In Logrithmic)")
+  labs(x = "Hand-Wing Index", y = "mass(In Logrithmic)", color = "Invertivore")
 ```
 
----
-
-class: inverse, middle, center
-
-# Using xaringan
-
----
-
----
-
-# xaringan
-
-- The presentation is created using the `xaringan` package
-
-- Use `---` to separate slides and `--` for incremental builds
-
---
-
-- Like this
-
----
-
-# Layouts
-
-You can use plain text
-
-- or bullet points
-
-.pull-left[
-or text in two columns $^*$
-]
-.pull-right[
-- like
-- this
-]
-
-.footnote[
-[*] And add footnotes
-]
-
----
-
-# Code
-
-```{r boring-regression}
-# a boring regression
-model <- lm(dist ~ speed, data = cars)
-tidy(model)
-glance(model)
-```
-
----
-
-# Plots
-
-```{r recode-species, echo = FALSE}
-# In this chunk I'm doing a bunch of analysis that I don't want to present 
-# in my slides. But I need the resulting data frame for a plot I want to present.
-iris_modified <- iris %>%
-  mutate(Species = fct_other(Species, keep = "setosa"))
-```
-
-```{r plot-iris, echo = FALSE}
-# Code hidden with echo = FALSE
-# Uses modified iris dataset from previous chunk
-# Play around with height and width until you're happy with the look
-ggplot(data = iris_modified, mapping = aes(x = Sepal.Width, y = Sepal.Length, color = Species)) +
-  geom_point() + 
-  theme_minimal() # theme options: https://ggplot2.tidyverse.org/reference/ggtheme.html
-```
-
----
-
-## Plot and text
-
-.pull-left[
-- Some text
-- goes here
-]
-.pull-right[
-```{r warning=FALSE, out.width="100%", fig.width=4, echo=FALSE}
-# see how I changed out.width and fig.width from defaults
-# to make the figure bigger
-ggplot(penguins, aes(x = bill_length_mm, y = species, color = species)) +
-  geom_boxplot() +
-  theme_minimal()
-```
-]
-
----
-
-# Tables
-
-If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
-
-```{r iris-table, echo = FALSE}
-kable(head(iris), format = "html")
-```
-
----
-
-# Images
-
-```{r castle, echo = FALSE, out.width = "55%", fig.align = "center", fig.cap = "Image credit: Photo by Jörg Angeli on Unsplash."}
-include_graphics("img/edinburgh-castle.jpg")
-```
-
-Or you can also include a full page image. See next slide.
 
 ---
 
 
 class: inverse, center, middle
-background-image: url(img/edinburgh-castle.jpg)
-background-size: contain
----
 
-# Math Expressions
+# Thanks for listening!
 
-You can write LaTeX math expressions inside a pair of dollar signs, e.g. &#36;\alpha+\beta$ renders $\alpha+\beta$. You can use the display style with double dollar signs:
-
-```
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-```
-
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-
-Limitations:
-
-1. The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character;
-
-1. There should not be spaces after the opening `$` or before the closing `$`.
-
-1. Math does not work on the title slide (see [#61](https://github.com/yihui/xaringan/issues/61) for a workaround).
 
 ---
-
-# Feeling adventurous?
-
-- Want to find out more about `xaringan`? See https://slides.yihui.name/xaringan/#1.
-
-- You are welcome to use the default styling of the slides. In fact, that's what I expect majority of you will do. You will differentiate yourself with the content of your presentation.
-
-- But some of you might want to play around with slide styling. The 
-`xaringanthemer` provides some solutions for this that: https://pkg.garrickadenbuie.com/xaringanthemer.
-
-- And if you want more bells and whistles, there is also `xaringanExtra`: https://pkg.garrickadenbuie.com/xaringanExtra.
