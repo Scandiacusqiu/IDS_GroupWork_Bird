@@ -409,7 +409,7 @@ data %>%
 ```{r invertivore ~ handwingindex + Mass}
 # Choose needed data
 data_hwi2 <- data %>% 
-  select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>%
   mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
                        TRUE ~ "0"))
 
@@ -422,7 +422,7 @@ data_test2 <- testing(data_split2)
 
 
 # Construct workflow
-data_rec2 <- recipe(Invertivore ~ `Hand-Wing.Index` + Mass, data = data_train2) %>% 
+data_rec2 <- recipe(Invertivore ~ `Hand-Wing.Index` + Mass, data = data_train2) %>%
   step_naomit(all_predictors()) %>% 
   step_dummy(all_nominal(), -all_outcomes())
 
@@ -435,7 +435,7 @@ data_wflow2 <- workflow() %>%
 
 data_fit2 <- data_wflow2 %>% 
   fit(data = data_train2)
-# tidy(data_fit)
+tidy(data_fit2)
 
 data_pred2 <- predict(data_fit2, data_test2, type = "prob") %>% 
   bind_cols(data_test2) %>% 
@@ -477,7 +477,7 @@ data_pred2 %>%
 folds1 <- vfold_cv(data_train2, v = 5)
 data_fit_rs2 <- data_wflow2 %>% 
   fit_resamples(folds1)
-collect_metrics(data_fit_rs1)
+collect_metrics(data_fit_rs2)
 
 rmse(data_pred2, truth = Invertivore_num, estimate = .pred)
 rsq(data_pred2, truth = Invertivore_num, estimate = .pred)
@@ -487,7 +487,7 @@ TN<-715
 FP<- 586
 FN<- 151
 
-Sensitivity <- TP/(TP+FN) 
+Sensitivity <- TP/(TP+FN)
 Sensitivity
 
 Specificity <- TN/(TN+FP)

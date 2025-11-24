@@ -97,7 +97,7 @@ We thought the place that the bird live defines the physical factor relate to th
 
 ---
 # Select Data Needed
-```{r Latitude ~ .}
+```{r Latitude ~ ., echo=FALSE}
 # Choose needed data
 data_lat1 <- data %>% 
   select(Beak.Length_Culmen, 
@@ -115,6 +115,8 @@ colnames(data_lat1) <- c("Beak_length_C",
                         "Habitat", 
                         "Mass", 
                         "Latitude")
+
+data_lat1
 ```
 ---
 # Construct Workflow
@@ -139,7 +141,7 @@ data_wflow1 <- workflow() %>%
 ```
 ---
 # Fit Data
-```{r fit data Latitude ~ .}
+```{r fit data Latitude ~ ., echo=FALSE}
 data_fit1 <- data_wflow1 %>% 
   fit(data = data_train1)
 # tidy(data_fit1)
@@ -151,10 +153,9 @@ data_pred1 <- predict(data_fit1, data_test1) %>%
   bind_cols(data_test1) %>% 
   print(n = 5)
 ```
----
 
 # Test Model Performance
-```{r check model performence Latitude ~ .}
+```{r check model performence Latitude ~ ., echo=FALSE}
 # Check model performance
 data_train1 <- data_train1 %>% 
   filter(!is.na(Habitat))
@@ -172,18 +173,7 @@ class: inverse, center, middle
 # Why the model does not work?
 
 ---
-
-# Plotting Beak width + depth
-```{r Plotting Beak width + depth code, eval=FALSE}
-ggplot(data, aes(x = log(Beak.Width), 
-                 y = log(Beak.Depth), 
-                 color = Centroid.Latitude))+
-         geom_point()
-```
-
----
-
-# Plotting Beak width + depth
+### Plotting Beak width + depth
 ```{r Plotting Beak width & depth pic, echo=FALSE}
 ggplot(data, aes(x = log(Beak.Width), y = log(Beak.Depth), color = Centroid.Latitude))+
          geom_point()
@@ -191,9 +181,247 @@ ggplot(data, aes(x = log(Beak.Width), y = log(Beak.Depth), color = Centroid.Lati
 
 ---
 
+
+class: inverse, middle, center
+
+# Investigation on Trophic.Niche
+
+---
+# Looking at data
+.pull-left[
+```{r looking at data1, echo=FALSE}
+data %>% 
+  select(Trophic.Niche, Mass, `Hand-Wing.Index`) %>% 
+  count(Trophic.Niche)
+```
+]
+.pull-right[
+```{r looking at data2}
+data %>% 
+  select(Trophic.Niche, Mass, `Hand-Wing.Index`) %>% 
+  filter(!is.na(Trophic.Niche)) %>% 
+  group_by(Trophic.Niche) %>% 
+  summarise(mean_mass = mean(Mass), mean_hwi = mean(`Hand-Wing.Index`))
+```
+]
+---
+# Modelling
+```{r modelling1, eval=FALSE}
+# Convert Trophic.Niche into Binomial output
+data_hwi2 <- data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>%
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+```
+---
+# Modelling
+```{r modelling 11, echo=FALSE}
+# Choose needed data
+data_hwi <- data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`) %>% 
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+
+
+# Start modelling
+set.seed(8888)
+data_split1 <- initial_split(data_hwi, 0.8)
+data_train1 <- training(data_split1)
+data_test1 <- testing(data_split1)
+
+
+# Construct workflow
+data_rec1 <- recipe(Invertivore ~ `Hand-Wing.Index`, data = data_train1) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod1 <- logistic_reg() %>% 
+  set_engine("glm")
+
+data_wflow1 <- workflow() %>% 
+  add_model(data_mod1) %>% 
+  add_recipe(data_rec1)
+
+data_fit1 <- data_wflow1 %>% 
+  fit(data = data_train1)
+# tidy(data_fit)
+
+data_pred1 <- predict(data_fit1, data_test1, type = "prob") %>% 
+  bind_cols(data_test1) %>% 
+  print(n = 10)
+```
+---
+# Evaluate Model Performance
+```{r modelling13, echo=FALSE}
+cut_off_prob <- 0.45
+data_pred1 <- data_pred1 %>% 
+  mutate(Invertivore_fac = factor(Invertivore), 
+         Invertivore_num = as.numeric(Invertivore), 
+         .pred = case_when(.pred_1 > cut_off_prob ~ 1, 
+                           TRUE ~ 0))
+
+data_pred1 %>%
+  roc_curve(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  autoplot()
+```
+---
+# Evaluate Model Performance
+.pull-left[
+```{r modelling14, echo=FALSE}
+data_pred1 %>%
+  roc_auc(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  )
+```
+]
+.pull-right[
+```{r modelling15, echo=FALSE}
+rmse(data_pred1, truth = Invertivore_num, estimate = .pred)
+rsq(data_pred1, truth = Invertivore_num, estimate = .pred)
+```
+]
+---
+# Evaluate Model Performance
+```{r modelling12}
+cut_off_prob <- 0.45
+```
+
+```{r modelling16, echo=FALSE}
+data_pred1 %>% 
+  mutate(
+    response = if_else(Invertivore == "1", "Invertivore", "Not Invertivore"), 
+    Invertivore_pred = if_else(.pred_1 >= cut_off_prob, "Predicted Invertivore", "Predicted Not Invertivore")
+  )  %>% 
+  count(response, Invertivore_pred) %>% 
+  pivot_wider(names_from = Invertivore_pred, values_from = n)
+```
+---
+class: inverse, middle, center
+
+# Improving model by adding mass as a predictor
+---
+# Modelling
+```{r modelling2, echo=FALSE}
+data_hwi2 <- data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>%
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+
+# Construct workflow
+set.seed(8888)
+data_split2 <- initial_split(data_hwi2)
+data_train2 <- training(data_split2)
+data_test2 <- testing(data_split2)
+
+data_rec2 <- recipe(Invertivore ~ `Hand-Wing.Index` + Mass, data = data_train2) %>%
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod2 <- logistic_reg() %>% 
+  set_engine("glm")
+
+data_wflow2 <- workflow() %>% 
+  add_model(data_mod2) %>% 
+  add_recipe(data_rec2)
+
+data_fit2 <- data_wflow2 %>% 
+  fit(data = data_train2)
+
+data_pred2 <- predict(data_fit2, data_test2, type = "prob") %>% 
+  bind_cols(data_test2) %>% 
+  print(n = 10)
+```
+---
+# Evaluate Model Performance
+```{r Evaluate Model2, echo=FALSE}
+data_pred2 <- data_pred2 %>% 
+  mutate(Invertivore_fac = factor(Invertivore), 
+         Invertivore_num = as.numeric(Invertivore), 
+         .pred = case_when(.pred_1 > cut_off_prob ~ 1, 
+                           TRUE ~ 0))
+
+data_pred2 %>%
+  roc_curve(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  autoplot()
+```
+---
+# Evaluate Model Performance
+.pull-left[
+```{r Evaluate Model3, echo=FALSE}
+data_pred2 %>%
+  roc_auc(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  )
+```
+]
+
+.pull-right[
+```{r Evaluate Model5, echo=FALSE}
+rmse(data_pred2, truth = Invertivore_num, estimate = .pred)
+rsq(data_pred2, truth = Invertivore_num, estimate = .pred)
+```
+]
+---
+# Evaluate Model Performance
+```{r Evaluate Model1}
+cut_off_prob <- 0.45
+```
+
+```{r Evaluate Model6, echo=FALSE}
+data_pred2 %>% 
+  mutate(
+    response = if_else(Invertivore == "1", "Invertivore", "Not Invertivore"), 
+    Invertivore_pred = if_else(.pred_1 >= cut_off_prob, "Predicted Invertivore", "Predicted Not Invertivore")
+  )  %>% 
+  count(response, Invertivore_pred) %>% 
+  pivot_wider(names_from = Invertivore_pred, values_from = n)
+
+TP<-1047
+TN<-715
+FP<- 586
+FN<- 151
+
+Sensitivity <- TP/(TP+FN)
+print("Sensitivity = ")
+Sensitivity
+
+Specificity <- TN/(TN+FP)
+print("Specificity = ")
+Specificity
+```
+---
+class: inverse, center, middle
+
+# Why model does not work?
+---
+### Plot out the data
+```{r plot trophic.niche, echo=FALSE}
+data %>% 
+  mutate(yn = case_when(Trophic.Niche == "Invertivore" ~ "y", TRUE ~ "n")) %>% 
+  ggplot(aes(x = `Hand-Wing.Index`, y = log(Mass), color = yn)) + 
+  geom_jitter(alpha = 0.3) + 
+  labs(x = "Hand-Wing Index", y = "mass(In Logrithmic)")
+```
+
+---
+
 class: inverse, middle, center
 
 # Using xaringan
+
+---
 
 ---
 
