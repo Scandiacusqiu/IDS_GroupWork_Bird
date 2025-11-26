@@ -288,60 +288,60 @@ class: inverse, middle, center
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt; Trophic.Niche &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; mean_mass &lt;/th&gt;
    &lt;th style="text-align:right;"&gt; mean_hwi &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; sd_hwi &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Aquatic predator &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 927.714 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 43.553 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15.849 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Frugivore &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 356.395 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 23.002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9.060 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Granivore &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 63.930 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 24.873 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.090 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Herbivore aquatic &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1440.574 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 43.283 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7.232 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Herbivore terrestrial &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1176.938 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 34.677 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.958 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Invertivore &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 49.901 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 20.419 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.299 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Nectarivore &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 14.200 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 49.655 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.410 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Omnivore &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 431.699 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 24.488 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.071 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Scavenger &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 5274.600 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 37.073 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.762 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Vertivore &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 751.994 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 33.538 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9.670 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -356,7 +356,7 @@ class: inverse, middle, center
 ``` r
 # Convert Trophic.Niche into Binomial output
 data_hwi2 &lt;- data %&gt;% 
-  select(Trophic.Niche, `Hand-Wing.Index`, Mass) %&gt;%
+  select(Trophic.Niche, `Hand-Wing.Index`) %&gt;%
   mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
                        TRUE ~ "0"))
 ```

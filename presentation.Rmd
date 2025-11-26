@@ -219,10 +219,10 @@ data %>%
 .pull-right[
 ```{r looking at data2, echo=FALSE}
 data %>% 
-  select(Trophic.Niche, Mass, `Hand-Wing.Index`) %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`) %>% 
   filter(!is.na(Trophic.Niche)) %>% 
   group_by(Trophic.Niche) %>% 
-  summarise(mean_mass = mean(Mass), mean_hwi = mean(`Hand-Wing.Index`)) %>% 
+  summarise(mean_hwi = mean(`Hand-Wing.Index`), sd_hwi = sd(`Hand-Wing.Index`)) %>% 
   kable(format = 'html', digits = 3)
 ```
 ]
@@ -235,7 +235,7 @@ data %>%
 ```{r modelling1, eval=FALSE}
 # Convert Trophic.Niche into Binomial output
 data_hwi2 <- data %>% 
-  select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>%
+  select(Trophic.Niche, `Hand-Wing.Index`) %>%
   mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
                        TRUE ~ "0"))
 ```
