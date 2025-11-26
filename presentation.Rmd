@@ -98,7 +98,7 @@ class: inverse, center, middle
 
 
 # Construct a model
-### Predicting Centroid.Latitude using "Range_Size", "Trophic_Level", "Habitat", and "Mass"
+### Predicting Centroid.Latitude using "Beak.Width" and "Beak.Depth"
 
 
 --
@@ -115,20 +115,12 @@ We thought the place that the bird live defines the physical factor relate to th
 ```{r Latitude ~ ., echo=FALSE}
 # Choose needed data
 data_lat1 <- data %>% 
-  select(Beak.Length_Culmen, 
-         Beak.Length_Nares, 
-         Beak.Depth, 
-         Range.Size, 
-         Habitat, 
-         Mass, 
+  select(Beak.Width,
+         Beak.Depth, , 
          Centroid.Latitude)
 # Modify col names
-colnames(data_lat1) <- c("Beak_length_C", 
-                        "Beak_Length_N", 
+colnames(data_lat1) <- c("Beak_Width", 
                         "Beak_Depth", 
-                        "Range_Size", 
-                        "Habitat", 
-                        "Mass", 
                         "Latitude")
 
 kable(head(data_lat1), format = 'html')
@@ -169,9 +161,6 @@ data_fit1 <- data_wflow1 %>%
   fit(data = data_train1)
 # tidy(data_fit1)
 
-data_test1 <- data_test1 %>% 
-  filter(!is.na(Habitat))
-
 data_pred1 <- predict(data_fit1, data_test1) %>% 
   bind_cols(data_test1) %>% 
   print(n = 5)
@@ -180,8 +169,6 @@ data_pred1 <- predict(data_fit1, data_test1) %>%
 # Test Model Performance
 ```{r check model performence Latitude ~ ., echo=FALSE}
 # Check model performance
-data_train1 <- data_train1 %>% 
-  filter(!is.na(Habitat))
 
 folds1 <- vfold_cv(data_train1, v = 5)
 

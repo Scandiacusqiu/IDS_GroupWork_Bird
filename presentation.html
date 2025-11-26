@@ -89,7 +89,7 @@ class: inverse, center, middle
 
 
 # Construct a model
-### Predicting Centroid.Latitude using "Range_Size", "Trophic_Level", "Habitat", and "Mass"
+### Predicting Centroid.Latitude using "Beak.Width" and "Beak.Depth"
 
 
 --
@@ -106,68 +106,40 @@ We thought the place that the bird live defines the physical factor relate to th
 &lt;table&gt;
  &lt;thead&gt;
   &lt;tr&gt;
-   &lt;th style="text-align:right;"&gt; Beak_length_C &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Beak_Length_N &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Beak_Width &lt;/th&gt;
    &lt;th style="text-align:right;"&gt; Beak_Depth &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Range_Size &lt;/th&gt;
-   &lt;th style="text-align:left;"&gt; Habitat &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Mass &lt;/th&gt;
    &lt;th style="text-align:right;"&gt; Latitude &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 27.7 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 17.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.6 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 14.7 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 37461.21 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Forest &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 248.8 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; -8.15 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 20.6 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 12.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.8 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 11.6 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 22374973.00 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Shrubland &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 131.2 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 8.23 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 26.5 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 14.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9.2 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 13.5 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Woodland &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 287.5 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 22.5 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 14.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.9 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 11.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 35580.71 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Forest &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 142.0 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; -5.45 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 21.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 12.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.7 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 11.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2936751.80 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Forest &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 186.5 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 45.24 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 20.0 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 11.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.6 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 12.0 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 327.84 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Forest &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 122.0 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 8.42 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
@@ -206,25 +178,25 @@ data_wflow1 &lt;- workflow() %&gt;%
 # Fit Data
 
 ```
-## # A tibble: 1,989 × 8
-##   .pred Beak_length_C Beak_Length_N Beak_Depth Range_Size Habitat  Mass Latitude
-##   &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;    &lt;dbl&gt;
-## 1  2.30          21.1          12.1       11.1   2936752. Forest   186.    45.2 
-## 2  2.07          20.5          11.5       10.9   2096402. Forest   158.     0.71
-## 3  1.47          21.1          12.2       11.2     48150. Forest   156     -1.32
-## 4  1.04          26            15.2       16.3     33511. Forest   675     21.6 
-## 5  1.32          27.9          15.9       13.6     22782. Forest   359.     0.88
-## # ℹ 1,984 more rows
+## # A tibble: 1,999 × 4
+##   .pred Beak_Width Beak_Depth Latitude
+##   &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+## 1  2.83        8.7       11.1    45.2 
+## 2  2.76        8.3       10.9     0.71
+## 3  2.78        8.6       11.2    -1.32
+## 4  1.42        8.3       16.3    21.6 
+## 5  2.61       10         13.6     0.88
+## # ℹ 1,994 more rows
 ```
 
 # Test Model Performance
 
 ```
 ## # A tibble: 2 × 6
-##   .metric .estimator    mean     n std_err .config        
-##   &lt;chr&gt;   &lt;chr&gt;        &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;          
-## 1 rmse    standard   22.2        5 0.132   pre0_mod0_post0
-## 2 rsq     standard    0.0263     5 0.00604 pre0_mod0_post0
+##   .metric .estimator     mean     n std_err .config        
+##   &lt;chr&gt;   &lt;chr&gt;         &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;          
+## 1 rmse    standard   22.4         5 0.181   pre0_mod0_post0
+## 2 rsq     standard    0.00235     5 0.00169 pre0_mod0_post0
 ```
 
 
