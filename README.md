@@ -2,6 +2,12 @@
 
 This is a template repository for your group project. One of your group members should clone this repository and add the other team members as collaborators. You should also add the `uoeIDS` course GitHub account as a collaborator.
 
+##Team Members
+- Naomi Pihlaja (s2772942), NaomiPihlaja
+- Yupeng Qiu(s2872801), Scandicusqiu
+- Jiaxi Yan(s2799450), J07-12
+- Jiayi Chen(s2907954), CiciChen0325
+
 ## Repository structure
 
 - `/data` -- Save any data you are using for your project in this folder.
