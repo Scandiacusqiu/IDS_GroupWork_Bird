@@ -11,7 +11,7 @@
 
 <meta name="author" content="by Team-Name: Naomi Pihlaja, Jiaxi Yan, Yupeng Qiu, J|iayi Chen" />
 
-<meta name="date" content="2025-11-24" />
+<meta name="date" content="2025-11-26" />
 
 <title>Project title</title>
 
@@ -353,7 +353,7 @@ display: none;
 <h1 class="title toc-ignore">Project title</h1>
 <h4 class="author">by Team-Name: Naomi Pihlaja, Jiaxi Yan, Yupeng Qiu,
 J|iayi Chen</h4>
-<h4 class="date">2025-11-24</h4>
+<h4 class="date">2025-11-26</h4>
 
 </div>
 
@@ -401,17 +401,22 @@ biology and animal adaptations based on lifestyle.</p>
 characteristics of birds. Many are numerical variables (eg. Beak depth),
 but some are categorical (eg. Trophic level).Over 10,000 observations
 allows for a big sample size.</p>
-<pre><code>## # A tibble: 8 × 3
-##   variable          Type        Description                                     
-##   &lt;chr&gt;             &lt;chr&gt;       &lt;chr&gt;                                           
-## 1 Centroid Latitude Numerical   The geometric centre of the species range       
-## 2 Trophic level     Categorical Categorical variable based on the composition o…
-## 3 Beak width        Numerical   Width of the beak at the anterior edge of the n…
-## 4 Beak depth        Numerical   Depth of the beak at the anterior edge of the n…
-## 5 Habitat           Categorical Where the bird lives                            
-## 6 Mass              Numerical   Body mass of species average                    
-## 7 Wing length       Numerical   Length from the carpal joint to the tip of the …
-## 8 Hangwingindex     Numerical   A measurement of a bird&#39;s wing shape that indic…</code></pre>
+<ul>
+<li><p>Habitat: Where the bird lives</p></li>
+<li><p>Trophic.level: Categorical variable based on the composition of a
+birds’ diet</p></li>
+<li><p>Hangwingindex: A measurement of a bird’s wing shape that
+indicates flight efficiency and dispersal ability</p></li>
+<li><p>Beak.width: Width of the beak at the anterior edge of the
+nostrils</p></li>
+<li><p>Beak.depth: Depth of the beak at the anterior edge of the
+nostrils</p></li>
+<li><p>Centroid.Latitude: The geometric centre of the species
+range</p></li>
+<li><p>Mass: Body mass of species average</p></li>
+<li><p>Wing.length: Length from the carpal joint to the tip of the
+longest primary on the unflattened wing</p></li>
+</ul>
 </div>
 <div id="exploratory-statistics" class="section level1">
 <h1>Exploratory Statistics</h1>
@@ -625,7 +630,11 @@ correlation between trophic niche and mass:</p>
 ##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
 ## 1 roc_auc binary         0.789</code></pre>
 <pre><code>## → A | warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<<<<<<< HEAD
 <pre><code>## There were issues with some computations   A: x1There were issues with some computations   A: x3There were issues with some computations   A: x5</code></pre>
+=======
+<pre><code>## There were issues with some computations   A: x1There were issues with some computations   A: x2There were issues with some computations   A: x5</code></pre>
+>>>>>>> 7868f94d5dda4ed76433f5d32d32a2e1f6ef648f
 <pre><code>## # A tibble: 3 × 6
 ##   .metric     .estimator  mean     n std_err .config        
 ##   &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;          
