@@ -529,6 +529,3 @@ data %>%
 class: inverse, center, middle
 
 # Thanks for listening!
-
-
----
