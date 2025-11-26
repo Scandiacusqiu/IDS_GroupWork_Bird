@@ -275,11 +275,11 @@ data_wflow1 <- workflow() %>%
 
 data_fit1 <- data_wflow1 %>% 
   fit(data = data_train1)
-# tidy(data_fit)
+tidy(data_fit1)
 
 data_pred1 <- predict(data_fit1, data_test1, type = "prob") %>% 
   bind_cols(data_test1) %>% 
-  print(n = 15)
+  print(n = 5)
 ```
 
 
@@ -403,10 +403,11 @@ suppressWarnings(
 data_fit2 <- data_wflow2 %>% 
   fit(data = data_train2)
 )
+tidy(data_fit2)
 
 data_pred2 <- predict(data_fit2, data_test2, type = "prob") %>% 
   bind_cols(data_test2) %>% 
-  print(n = 15)
+  print(n = 5)
 ```
 
 

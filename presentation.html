@@ -369,25 +369,23 @@ data_hwi2 &lt;- data %&gt;%
 # Making Prediction
 
 ```
+## # A tibble: 2 × 5
+##   term              estimate std.error statistic   p.value
+##   &lt;chr&gt;                &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)         1.20     0.0508       23.6 3.73e-123
+## 2 `Hand-Wing.Index`  -0.0520   0.00191     -27.2 1.68e-162
+```
+
+```
 ## # A tibble: 1,999 × 5
-##    .pred_0 .pred_1 Trophic.Niche    `Hand-Wing.Index` Invertivore
-##      &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                        &lt;dbl&gt; &lt;chr&gt;      
-##  1   0.637   0.363 Vertivore                     33.9 0          
-##  2   0.577   0.423 Vertivore                     29   0          
-##  3   0.603   0.397 Vertivore                     31.1 0          
-##  4   0.551   0.449 Vertivore                     27   0          
-##  5   0.589   0.411 Vertivore                     30   0          
-##  6   0.686   0.314 Vertivore                     38.1 0          
-##  7   0.517   0.483 Vertivore                     24.4 0          
-##  8   0.704   0.296 Vertivore                     39.7 0          
-##  9   0.684   0.316 Vertivore                     37.9 0          
-## 10   0.639   0.361 Vertivore                     34   0          
-## 11   0.654   0.346 Invertivore                   35.3 1          
-## 12   0.551   0.449 Aquatic predator              27   0          
-## 13   0.648   0.352 Vertivore                     34.8 0          
-## 14   0.640   0.360 Vertivore                     34.1 0          
-## 15   0.631   0.369 Vertivore                     33.4 0          
-## # ℹ 1,984 more rows
+##   .pred_0 .pred_1 Trophic.Niche `Hand-Wing.Index` Invertivore
+##     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt; &lt;chr&gt;      
+## 1   0.637   0.363 Vertivore                  33.9 0          
+## 2   0.577   0.423 Vertivore                  29   0          
+## 3   0.603   0.397 Vertivore                  31.1 0          
+## 4   0.551   0.449 Vertivore                  27   0          
+## 5   0.589   0.411 Vertivore                  30   0          
+## # ℹ 1,994 more rows
 ```
 
 
@@ -513,25 +511,24 @@ class: inverse, middle, center
 # Making Prediction
 
 ```
+## # A tibble: 3 × 5
+##   term              estimate std.error statistic   p.value
+##   &lt;chr&gt;                &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)        1.42     0.0541        26.3 8.78e-153
+## 2 `Hand-Wing.Index` -0.0404   0.00197      -20.6 6.82e- 94
+## 3 Mass              -0.00484  0.000259     -18.7 3.62e- 78
+```
+
+```
 ## # A tibble: 2,499 × 6
-##    .pred_0       .pred_1 Trophic.Niche `Hand-Wing.Index`  Mass Invertivore
-##      &lt;dbl&gt;         &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      
-##  1   0.760 0.240         Vertivore                  33.9  249. 0          
-##  2   0.629 0.371         Vertivore                  32.7  131. 0          
-##  3   0.587 0.413         Vertivore                  29    125  0          
-##  4   0.828 0.172         Vertivore                  31.1  359. 0          
-##  5   0.991 0.00855       Vertivore                  27   1050  0          
-##  6   0.797 0.203         Vertivore                  30    326. 0          
-##  7   0.745 0.255         Vertivore                  38.1  198  0          
-##  8   0.683 0.317         Vertivore                  24.4  249. 0          
-##  9   0.562 0.438         Vertivore                  27.4  117  0          
-## 10   1.000 0.000000500   Vertivore                  39.7 2958  0          
-## 11   0.991 0.00854       Vertivore                  27.4 1047  0          
-## 12   1.000 0.0000000463  Vertivore                  39.6 3450. 0          
-## 13   1.000 0.0000264     Vertivore                  37.9 2154. 0          
-## 14   1.000 0.0000172     Vertivore                  38.7 2236. 0          
-## 15   1.000 0.00000000157 Vertivore                  34   4195  0          
-## # ℹ 2,484 more rows
+##   .pred_0 .pred_1 Trophic.Niche `Hand-Wing.Index`  Mass Invertivore
+##     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      
+## 1   0.760 0.240   Vertivore                  33.9  249. 0          
+## 2   0.629 0.371   Vertivore                  32.7  131. 0          
+## 3   0.587 0.413   Vertivore                  29    125  0          
+## 4   0.828 0.172   Vertivore                  31.1  359. 0          
+## 5   0.991 0.00855 Vertivore                  27   1050  0          
+## # ℹ 2,494 more rows
 ```
 
 
