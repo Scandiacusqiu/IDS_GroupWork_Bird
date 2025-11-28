@@ -46,7 +46,7 @@ data <- read_csv("data/AVONET3_BirdTree.csv")
 ```{r include=FALSE}
 #Background image
 style_xaringan(
-  title_slide_background_image = "img/confetti.jpg"
+  title_slide_background_image = "img/pngtree-group-of-different-colored-birds-on-a-branch-image_2921675.jpg"
 )
 ```
 
