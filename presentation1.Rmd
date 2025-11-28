@@ -497,7 +497,7 @@ data %>%
 
 # Conclusion
 
- - Beak shapes are not effective explanatory variables based on the models we have created: low AUC values
+ - Beak shapes are not effective explanatory variables based on the models we have created: low r square and high root mean square error values
  - Hand-wing index and mass could be explanatory variables in predicting whether a bird is an invertivore: AUC value of 0.79
  - Low specificity suggests high potential improvements on the model either by adding more predictor or making transformation on data
  
