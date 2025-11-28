@@ -1,0 +1,510 @@
+---
+title: "Investigation on Avonet Bird Dataset"
+subtitle: 
+author: "Pipeline <br> Yupeng Qiu, Naomi Pihlaja, Jiaxi Yan, Jiayi Chen"
+institute: "University of Edinburgh"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    css: xaringan-themer.css
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      
+---
+
+```{r install-package, include = FALSE, eval = FALSE}
+# Copy and paste the following code into your console to download and install
+# the `xaringan` package that contains all of the code which allows you 
+# to create presentation slides in Rmarkdown
+install.packages('xaringan')
+```
+
+
+```{r load-packages, include = FALSE}
+# Add any additional packages you need to this chunk
+library(tidyverse)
+library(tidymodels)
+library(palmerpenguins)
+library(knitr)
+library(xaringanthemer)
+xaringanExtra::use_panelset()
+```
+
+```{r setup, include=FALSE}
+# For better figure resolution
+knitr::opts_chunk$set(fig.retina = 3, dpi = 300, fig.width = 6, fig.asp = 0.618, out.width = "80%")
+```
+
+```{r load-data, include=FALSE}
+data <- read_csv("data/AVONET3_BirdTree.csv")
+```
+
+```{r include=FALSE}
+#Background image
+style_xaringan(
+  title_slide_background_image = "img/confetti.jpg"
+)
+```
+
+class: center, middle
+
+## Goal of the investigation:
+
+### To predict certain characteristics of birds using their body measurements
+
+
+---
+
+
+class: inverse, center, middle
+
+# Explaining Data Set
+
+
+---
+
+
+# Variables of Interest
+
+.pull-left[
+### Categorical Variables
+ - Trophic.Level: Categorized by the bird's food source
+ - Trophic.Niche: More detailed category of trophic level
+]
+
+.pull-right[
+### Numerical Variables
+ - Beak.Width
+ - Beak.Depth
+ - Centroid.Latitude: The geometric centre of the species range (restricted to breeding and resident range)
+ - Hand-Wing.Index: 100*DK/Lw, where DK is Kipp’s distance and Lw is wing length (i.e., Kipp’s distance corrected for wing size)
+]
+
+
+---
+
+
+class: inverse, center, middle
+
+# Starting our investigation:
+
+
+---
+
+
+# Construct a model
+### Predicting Centroid.Latitude using "Beak.Width" and "Beak.Depth"
+
+
+--
+
+
+###Why?
+We thought the place that the bird live defines the physical factor relate to the bird
+
+
+---
+
+
+# Select Data Needed
+```{r Latitude ~ ., echo=FALSE}
+# Choose needed data
+data_lat1 <- data %>% 
+  select(Beak.Width,
+         Beak.Depth, , 
+         Centroid.Latitude)
+# Modify col names
+colnames(data_lat1) <- c("Beak_Width", 
+                        "Beak_Depth", 
+                        "Latitude")
+
+kable(head(data_lat1), format = 'html')
+```
+
+
+---
+
+
+# Construct Workflow
+```{r model Latitude ~ .}
+set.seed(2801)
+data_split1 <- initial_split(data_lat1, 0.8)
+data_train1 <- training(data_split1)
+data_test1 <- testing(data_split1)
+
+
+# Construct workflow
+data_rec1 <- recipe(Latitude ~ ., data = data_train1) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod1 <- linear_reg() %>% 
+  set_engine("lm")
+
+data_wflow1 <- workflow() %>% 
+  add_model(data_mod1) %>% 
+  add_recipe(data_rec1)
+```
+
+
+---
+
+
+# Fit Data
+```{r fit data Latitude ~ ., echo=FALSE}
+data_fit1 <- data_wflow1 %>% 
+  fit(data = data_train1)
+# tidy(data_fit1)
+
+data_pred1 <- predict(data_fit1, data_test1) %>% 
+  bind_cols(data_test1) %>% 
+  print(n = 5)
+```
+
+# Test Model Performance
+```{r check model performence Latitude ~ ., echo=FALSE}
+# Check model performance
+
+folds1 <- vfold_cv(data_train1, v = 5)
+
+data_fit_rs1 <- data_wflow1 %>% 
+  fit_resamples(folds1)
+collect_metrics(data_fit_rs1)
+```
+
+
+---
+
+
+class: inverse, center, middle
+
+# Why the model does not work?
+
+
+---
+
+
+### Plotting Beak width + depth
+```{r Plotting Beak width & depth pic, echo=FALSE}
+ggplot(data, aes(x = log(Beak.Width), y = log(Beak.Depth), color = Centroid.Latitude))+
+         geom_jitter(alpha = 0.3)
+```
+
+
+---
+
+
+class: inverse, middle, center
+
+# Investigation on Trophic.Niche
+
+
+---
+
+
+# Looking at data
+.pull-left[
+```{r looking at data1, echo=FALSE}
+data %>% 
+  select(Trophic.Niche, Mass, `Hand-Wing.Index`) %>% 
+  count(Trophic.Niche) %>% 
+  kable(format = 'html')
+```
+]
+
+.pull-right[
+```{r looking at data2, echo=FALSE}
+data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`) %>% 
+  filter(!is.na(Trophic.Niche)) %>% 
+  group_by(Trophic.Niche) %>% 
+  summarise(mean_hwi = mean(`Hand-Wing.Index`), sd_hwi = sd(`Hand-Wing.Index`)) %>% 
+  kable(format = 'html', digits = 3)
+```
+]
+
+
+---
+
+
+# Modelling
+```{r modelling1, eval=FALSE}
+# Convert Trophic.Niche into Binomial output
+data_hwi2 <- data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`) %>%
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+```
+
+
+---
+
+
+# Making Prediction
+```{r modelling 11, echo=FALSE}
+# Choose needed data
+data_hwi <- data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`) %>% 
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+
+
+# Start modelling
+set.seed(8888)
+data_split1 <- initial_split(data_hwi, 0.8)
+data_train1 <- training(data_split1)
+data_test1 <- testing(data_split1)
+
+
+# Construct workflow
+data_rec1 <- recipe(Invertivore ~ `Hand-Wing.Index`, data = data_train1) %>% 
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod1 <- logistic_reg() %>% 
+  set_engine("glm")
+
+data_wflow1 <- workflow() %>% 
+  add_model(data_mod1) %>% 
+  add_recipe(data_rec1)
+
+data_fit1 <- data_wflow1 %>% 
+  fit(data = data_train1)
+tidy(data_fit1)
+
+data_pred1 <- predict(data_fit1, data_test1, type = "prob") %>% 
+  bind_cols(data_test1) %>% 
+  print(n = 5)
+```
+
+
+---
+
+
+# Evaluate Model Performance
+```{r modelling13, echo=FALSE}
+cut_off_prob <- 0.45
+data_pred1 <- data_pred1 %>% 
+  mutate(Invertivore_fac = factor(Invertivore), 
+         Invertivore_num = as.numeric(Invertivore), 
+         .pred = case_when(.pred_1 > cut_off_prob ~ 1, 
+                           TRUE ~ 0))
+
+data_pred1 %>%
+  roc_curve(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  autoplot()
+```
+
+
+---
+
+
+# Evaluate Model Performance
+```{r modelling12}
+cut_off_prob <- 0.45
+```
+
+```{r modelling16, echo=FALSE}
+data_pred1 %>% 
+  mutate(
+    response = if_else(Invertivore == "1", "Invertivore", "Not Invertivore"), 
+    Invertivore_pred = if_else(.pred_1 >= cut_off_prob, "Predicted Invertivore", "Predicted Not Invertivore")
+  )  %>% 
+  count(response, Invertivore_pred) %>% 
+  pivot_wider(names_from = Invertivore_pred, values_from = n) %>% 
+  kable(format = 'html')
+
+TP <- 798
+TN <- 529
+FP <- 511
+FN <- 161
+Sensitivity <- TP/(TP+FN)
+Specificity <- TN/(TN+FP)
+```
+
+Sensitivity = `r round(Sensitivity, 3)`
+
+Specificity = `r round(Specificity, 3)`
+
+
+---
+
+
+# Evaluate Model Performance
+```{r modelling 17}
+cut_off_prob <- 0.45
+```
+
+```{r modelling14, echo=FALSE}
+data_pred1 %>%
+  roc_auc(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  kable(format = 'html', digits = 3)
+```
+
+
+---
+
+
+class: inverse, middle, center
+
+# Improving model by adding mass as a predictor
+
+
+---
+
+
+# Making Prediction
+```{r modelling2, echo=FALSE}
+data_hwi2 <- data %>% 
+  select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>%
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+
+# Construct workflow
+set.seed(8888)
+data_split2 <- initial_split(data_hwi2)
+data_train2 <- training(data_split2)
+data_test2 <- testing(data_split2)
+
+data_rec2 <- recipe(Invertivore ~ `Hand-Wing.Index` + Mass, data = data_train2) %>%
+  step_naomit(all_predictors()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod2 <- logistic_reg() %>% 
+  set_engine("glm")
+
+data_wflow2 <- workflow() %>% 
+  add_model(data_mod2) %>% 
+  add_recipe(data_rec2)
+
+suppressWarnings(
+data_fit2 <- data_wflow2 %>% 
+  fit(data = data_train2)
+)
+tidy(data_fit2)
+
+data_pred2 <- predict(data_fit2, data_test2, type = "prob") %>% 
+  bind_cols(data_test2) %>% 
+  print(n = 5)
+```
+
+
+---
+
+
+# Evaluate Model Performance
+```{r Evaluate Model2, echo=FALSE}
+data_pred2 <- data_pred2 %>% 
+  mutate(Invertivore_fac = factor(Invertivore), 
+         Invertivore_num = as.numeric(Invertivore), 
+         .pred = case_when(.pred_1 > cut_off_prob ~ 1, 
+                           TRUE ~ 0))
+
+data_pred2 %>%
+  roc_curve(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  autoplot()
+```
+
+
+---
+
+
+# Evaluate Model Performance
+```{r Evaluate Model1}
+cut_off_prob <- 0.45
+```
+
+```{r Evaluate Model6, echo=FALSE}
+data_pred2 %>% 
+  mutate(
+    response = if_else(Invertivore == "1", "Invertivore", "Not Invertivore"), 
+    Invertivore_pred = if_else(.pred_1 >= cut_off_prob, "Predicted Invertivore", "Predicted Not Invertivore")
+  )  %>% 
+  count(response, Invertivore_pred) %>% 
+  pivot_wider(names_from = Invertivore_pred, values_from = n) %>% 
+  kable(format = 'html')
+
+TP <- 1047
+TN <- 715
+FP <- 586
+FN <- 151
+Sensitivity <- TP/(TP+FN)
+Specificity <- TN/(TN+FP)
+```
+
+Sensitivity = `r round(Sensitivity, 3)`
+
+Specificity = `r round(Specificity, 3)`
+
+---
+
+
+# Evaluate Model Performance
+```{r Evaluate Model7}
+cut_off_prob <- 0.45
+```
+
+```{r Evaluate Model3, echo=FALSE}
+data_pred2 %>%
+  roc_auc(
+    truth = Invertivore_fac,
+    .pred_1,
+    event_level = "second"
+  ) %>% 
+  kable(format = 'html', digits = 3)
+```
+
+
+---
+
+
+class: inverse, center, middle
+
+# Why does the model not work?
+
+
+---
+
+
+### Plot out the data
+```{r plot trophic.niche, echo=FALSE}
+data %>% 
+  mutate(IN = case_when(Trophic.Niche == "Invertivore" ~ "Invertivore", TRUE ~ "Not Invertivore")) %>% 
+  ggplot(aes(x = `Hand-Wing.Index`, y = log(Mass), color = IN)) + 
+  geom_jitter(alpha = 0.3) + 
+  labs(x = "Hand-Wing Index", y = "mass(In Logrithmic)", color = "Invertivore")
+```
+
+
+---
+
+
+# Conclusion
+
+ - Beak shapes are not effective explanatory variables based on the models we have created: low AUC values
+ - Hand-wing index and mass could be explanatory variables in predicting whether a bird is an invertivore: AUC value of 0.79
+ - Low specificity suggests high potential improvements on the model either by adding more predictor or making transformation on data
+ 
+ 
+---
+
+
+class: inverse, center, middle
+
+# Thanks for listening!

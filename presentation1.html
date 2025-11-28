@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Investigation on Avonet Bird Dataset</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Pipeline   Yupeng Qiu, Naomi Pihlaja, Jiaxi Yan, Jiayi Chen" />
+    <meta name="date" content="2025-11-28" />
+    <script src="libs/header-attrs-2.29/header-attrs.js"></script>
+    <link href="libs/panelset-0.3.0/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset-0.3.0/panelset.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Investigation on Avonet Bird Dataset
+]
+.author[
+### Pipeline <br> Yupeng Qiu, Naomi Pihlaja, Jiaxi Yan, Jiayi Chen
+]
+.institute[
+### University of Edinburgh
+]
+.date[
+### 2025-11-28
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: center, middle
+
+## Goal of the investigation:
+
+### To predict certain characteristics of birds using their body measurements
+
+
+---
+
+
+class: inverse, center, middle
+
+# Explaining Data Set
+
+
+---
+
+
+# Variables of Interest
+
+.pull-left[
+### Categorical Variables
+ - Trophic.Level: Categorized by the bird's food source
+ - Trophic.Niche: More detailed category of trophic level
+]
+
+.pull-right[
+### Numerical Variables
+ - Beak.Width
+ - Beak.Depth
+ - Centroid.Latitude: The geometric centre of the species range (restricted to breeding and resident range)
+ - Hand-Wing.Index: 100*DK/Lw, where DK is Kipp’s distance and Lw is wing length (i.e., Kipp’s distance corrected for wing size)
+]
+
+
+---
+
+
+class: inverse, center, middle
+
+# Starting our investigation:
+
+
+---
+
+
+# Construct a model
+### Predicting Centroid.Latitude using "Beak.Width" and "Beak.Depth"
+
+
+--
+
+
+###Why?
+We thought the place that the bird live defines the physical factor relate to the bird
+
+
+---
+
+
+# Select Data Needed
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; Beak_Width &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Beak_Depth &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Latitude &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 10.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -8.15 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 8.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.23 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 9.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13.5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 8.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -5.45 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 8.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 45.24 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 6.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.42 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+
+
+# Construct Workflow
+
+``` r
+set.seed(2801)
+data_split1 &lt;- initial_split(data_lat1, 0.8)
+data_train1 &lt;- training(data_split1)
+data_test1 &lt;- testing(data_split1)
+
+
+# Construct workflow
+data_rec1 &lt;- recipe(Latitude ~ ., data = data_train1) %&gt;% 
+  step_naomit(all_predictors()) %&gt;% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+data_mod1 &lt;- linear_reg() %&gt;% 
+  set_engine("lm")
+
+data_wflow1 &lt;- workflow() %&gt;% 
+  add_model(data_mod1) %&gt;% 
+  add_recipe(data_rec1)
+```
+
+
+---
+
+
+# Fit Data
+
+```
+## # A tibble: 1,999 × 4
+##   .pred Beak_Width Beak_Depth Latitude
+##   &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+## 1  2.83        8.7       11.1    45.2 
+## 2  2.76        8.3       10.9     0.71
+## 3  2.78        8.6       11.2    -1.32
+## 4  1.42        8.3       16.3    21.6 
+## 5  2.61       10         13.6     0.88
+## # ℹ 1,994 more rows
+```
+
+# Test Model Performance
+
+```
+## # A tibble: 2 × 6
+##   .metric .estimator     mean     n std_err .config        
+##   &lt;chr&gt;   &lt;chr&gt;         &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;          
+## 1 rmse    standard   22.4         5 0.181   pre0_mod0_post0
+## 2 rsq     standard    0.00235     5 0.00169 pre0_mod0_post0
+```
+
+
+---
+
+
+class: inverse, center, middle
+
+# Why the model does not work?
+
+
+---
+
+
+### Plotting Beak width + depth
+&lt;img src="presentation1_files/figure-html/Plotting Beak width &amp; depth pic-1.png" width="80%" /&gt;
+
+
+---
+
+
+class: inverse, middle, center
+
+# Investigation on Trophic.Niche
+
+
+---
+
+
+# Looking at data
+.pull-left[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Trophic.Niche &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Aquatic predator &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 757 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Frugivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1030 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Granivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 664 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Herbivore aquatic &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 82 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Herbivore terrestrial &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 93 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4780 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nectarivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 507 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Omnivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1737 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Scavenger &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Vertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 312 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-right[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Trophic.Niche &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mean_hwi &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; sd_hwi &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Aquatic predator &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43.553 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15.849 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Frugivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 23.002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9.060 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Granivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24.873 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.090 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Herbivore aquatic &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43.283 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7.232 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Herbivore terrestrial &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 34.677 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.958 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.419 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.299 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nectarivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 49.655 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.410 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Omnivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24.488 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.071 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Scavenger &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37.073 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.762 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Vertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 33.538 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9.670 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+---
+
+
+# Modelling
+
+``` r
+# Convert Trophic.Niche into Binomial output
+data_hwi2 &lt;- data %&gt;% 
+  select(Trophic.Niche, `Hand-Wing.Index`) %&gt;%
+  mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
+                       TRUE ~ "0"))
+```
+
+
+---
+
+
+# Making Prediction
+
+```
+## # A tibble: 2 × 5
+##   term              estimate std.error statistic   p.value
+##   &lt;chr&gt;                &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)         1.20     0.0508       23.6 3.73e-123
+## 2 `Hand-Wing.Index`  -0.0520   0.00191     -27.2 1.68e-162
+```
+
+```
+## # A tibble: 1,999 × 5
+##   .pred_0 .pred_1 Trophic.Niche `Hand-Wing.Index` Invertivore
+##     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt; &lt;chr&gt;      
+## 1   0.637   0.363 Vertivore                  33.9 0          
+## 2   0.577   0.423 Vertivore                  29   0          
+## 3   0.603   0.397 Vertivore                  31.1 0          
+## 4   0.551   0.449 Vertivore                  27   0          
+## 5   0.589   0.411 Vertivore                  30   0          
+## # ℹ 1,994 more rows
+```
+
+
+---
+
+
+# Evaluate Model Performance
+&lt;img src="presentation1_files/figure-html/modelling13-1.png" width="80%" /&gt;
+
+
+---
+
+
+# Evaluate Model Performance
+
+``` r
+cut_off_prob &lt;- 0.45
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; response &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predicted Invertivore &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predicted Not Invertivore &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 798 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 161 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Not Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 511 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 529 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+Sensitivity = 0.832
+
+Specificity = 0.509
+
+
+---
+
+
+# Evaluate Model Performance
+
+``` r
+cut_off_prob &lt;- 0.45
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; .metric &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; .estimator &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .estimate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; roc_auc &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; binary &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.73 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+
+
+class: inverse, middle, center
+
+# Improving model by adding mass as a predictor
+
+
+---
+
+
+# Making Prediction
+
+```
+## # A tibble: 3 × 5
+##   term              estimate std.error statistic   p.value
+##   &lt;chr&gt;                &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)        1.42     0.0541        26.3 8.78e-153
+## 2 `Hand-Wing.Index` -0.0404   0.00197      -20.6 6.82e- 94
+## 3 Mass              -0.00484  0.000259     -18.7 3.62e- 78
+```
+
+```
+## # A tibble: 2,499 × 6
+##   .pred_0 .pred_1 Trophic.Niche `Hand-Wing.Index`  Mass Invertivore
+##     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      
+## 1   0.760 0.240   Vertivore                  33.9  249. 0          
+## 2   0.629 0.371   Vertivore                  32.7  131. 0          
+## 3   0.587 0.413   Vertivore                  29    125  0          
+## 4   0.828 0.172   Vertivore                  31.1  359. 0          
+## 5   0.991 0.00855 Vertivore                  27   1050  0          
+## # ℹ 2,494 more rows
+```
+
+
+---
+
+
+# Evaluate Model Performance
+&lt;img src="presentation1_files/figure-html/Evaluate Model2-1.png" width="80%" /&gt;
+
+
+---
+
+
+# Evaluate Model Performance
+
+``` r
+cut_off_prob &lt;- 0.45
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; response &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predicted Invertivore &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predicted Not Invertivore &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1047 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 151 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Not Invertivore &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 586 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 715 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+Sensitivity = 0.874
+
+Specificity = 0.55
+
+---
+
+
+# Evaluate Model Performance
+
+``` r
+cut_off_prob &lt;- 0.45
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; .metric &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; .estimator &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .estimate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; roc_auc &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; binary &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.789 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+
+
+class: inverse, center, middle
+
+# Why does the model not work?
+
+
+---
+
+
+### Plot out the data
+&lt;img src="presentation1_files/figure-html/plot trophic.niche-1.png" width="80%" /&gt;
+
+
+---
+
+
+# Conclusion
+
+ - Beak shapes are not effective explanatory variables based on the models we have created: low AUC values
+ - Hand-wing index and mass could be explanatory variables in predicting whether a bird is an invertivore: AUC value of 0.79
+ - Low specificity suggests high potential improvements on the model either by adding more predictor or making transformation on data
+ 
+ 
+---
+
+
+class: inverse, center, middle
+
+# Thanks for listening!
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+  "ratio": "16:9",
+  "highlightStyle": "github",
+  "highlightLines": true,
+  "countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
