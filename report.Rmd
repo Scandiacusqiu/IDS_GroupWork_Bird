@@ -403,7 +403,7 @@ data_hwi <- data %>%
   mutate(Invertivore = as.numeric(Invertivore))
 
 set.seed(8888)
-hwi_split <- initial_split(data_hwi, prop = 0.7, strata = Invertivore)
+hwi_split <- initial_split(data_hwi, prop = 0.8, strata = Invertivore)
 hwi_train <- training(hwi_split)
 hwi_test  <- testing(hwi_split)
 
@@ -415,10 +415,10 @@ hwi_test_pred <- hwi_test %>%
   mutate(
     Invertivore = factor(Invertivore),
     .pred       = predict(hwi_model, hwi_test, type = "response"),
-    .pred_class = factor(ifelse(.pred > 0.5, "1", "0"))
+    .pred_class = factor(ifelse(.pred > 0.45, "1", "0"))
   )
 
-hwi_auc        <- roc_auc(hwi_test_pred, truth = Invertivore, .pred)
+hwi_auc        <- roc_auc(hwi_test_pred, truth = Invertivore, .pred, event_level = "second")
 hwi_accuracy   <- accuracy(hwi_test_pred, truth = Invertivore, estimate = .pred_class)
 hwi_conf_mat   <- conf_mat(hwi_test_pred, truth = Invertivore, estimate = .pred_class)
 hwi_sensitivity <- sens(hwi_test_pred, truth = Invertivore, estimate = .pred_class)
@@ -439,7 +439,7 @@ data_hwi2 <- data %>%
   mutate(Invertivore = as.numeric(Invertivore))
 
 set.seed(8888)
-hwi_mass_split <- initial_split(data_hwi2, prop = 0.7, strata = Invertivore)
+hwi_mass_split <- initial_split(data_hwi2, prop = 0.8, strata = Invertivore)
 hwi_mass_train <- training(hwi_mass_split)
 hwi_mass_test  <- testing(hwi_mass_split)
 
@@ -451,10 +451,10 @@ hwi_mass_test_pred <- hwi_mass_test %>%
   mutate(
     Invertivore = factor(Invertivore),
     .pred       = predict(hwi_mass_model, hwi_mass_test, type = "response"),
-    .pred_class = factor(ifelse(.pred > 0.5, "1", "0"))
+    .pred_class = factor(ifelse(.pred > 0.45, "1", "0"))
   )
 
-hwi_mass_auc        <- roc_auc(hwi_mass_test_pred, truth = Invertivore, .pred)
+hwi_mass_auc        <- roc_auc(hwi_mass_test_pred, truth = Invertivore, .pred, event_level = "second")
 hwi_mass_accuracy   <- accuracy(hwi_mass_test_pred, truth = Invertivore, estimate = .pred_class)
 hwi_mass_conf_mat   <- conf_mat(hwi_mass_test_pred, truth = Invertivore, estimate = .pred_class)
 hwi_mass_sensitivity <- sens(hwi_mass_test_pred, truth = Invertivore, estimate = .pred_class)
