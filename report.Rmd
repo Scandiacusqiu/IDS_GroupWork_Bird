@@ -1,6 +1,6 @@
 ---
-title: "Project title"
-author: "by Team-Name: Naomi Pihlaja, Jiaxi Yan, Yupeng Qiu, Jiayi Chen"
+title: "Modelling Bird Characteristics"
+author: "by Pipeline: Naomi Pihlaja, Jiaxi Yan, Yupeng Qiu, Jiayi Chen"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -27,50 +27,61 @@ data <- read_csv("data/AVONET3_BirdTree.csv")
 
 ## Research Question
 
-Can we accurately predict certain characteristics of birds using chosen explanatory variables? If we can, we could predict lifestyle elements of lesser known, lesser investigated and/ or bird species. These predictions could be used in scientific research for wildlife conservation and investigation.
+**Can we accurately predict certain characteristics of birds using chosen explanatory variables?** 
+
+\n
+(If we can, we could potentially predict the lifestyle elements of lesser known/ lesser investigated bird species: these predictions could be used in scientific research for wildlife conservation and investigation.)
 
 
 ## Data
 
-figshare.com. (n.d.). AVONET: morphological, ecological and geographical data for all birds (Tobias et al 2022 Ecology Letters doi: https://doi.org/10.111/ele.13898). [online] Available at: https://figshare.com/s/b990722d72a26b5bfead. 
+figshare.com. (n.d.). AVONET: morphological, ecological and geographical data for all birds (Tobias et al 2022 Ecology Letters doi: https://doi.org/10.111/ele.13898). [online] Available at: https://figshare.com/s/b990722d72a26b5bfead.
 
 
 
 
 
-## Findings
+
+
+
 
 # Introduction
 
-Bird morphology and ecological traits offer valuable insight into how different species adapt to their environments. The AVONET dataset contains thousands of bird species with measurements of their morphology, habitat, and trophic ecology. This dataset allows us to explore questions regarding correlations of different bird traits, and of potential predictive modelling.
+A bird's ecological traits, especially morphological, offer valuable insights into how they adapt to their environments, and thus also offer insights into the conditions of their environment. The AVONET Birdtree dataset includes data about thousands of bird species. Most of the data concerns measurements on their morphology (eg. Beak width), but it also contains data on their habitats and trophic ecology. This dataset allows us to investigate hypothesis regarding potential correlations of different bird traits, and of potential predictive modelling.
 
-Our analysis investigates two key questions:
+\n
+Our investigation concerned two key questions:
 
-1. To what extent can morphological traits explain ecological characteristic such as trophic level or latitude?
-2. Which morphological variables show meaningful correlations with each other?
+\n
+**1. To what extent can morphological traits explain ecological characteristic such as trophic level or latitude?**
+**2. Which morphological variables show meaningful correlations with each other?**
 
+\n
 These questions were motivated by our hypothesis generated during group discussions, using logical thinking based on our knowledge of biology and animal adaptations based on lifestyle.
 
 # Data Overview
 
 Avonet birdtree contains summary statistics on specific characteristics of birds. Many are numerical variables (eg. Beak depth), but some are categorical (eg. Trophic level).Over 10,000 observations allows for a big sample size.
 
+\n
+Our variables of interest (data we thought would be worth investigating after looking through the dataset) were as follows:
 
+\n
+- **Habitat**: Where the bird lives
 
+- **Trophic.level**: Categorical variable based on the composition of a birds' diet
 
+- **Hangwingindex**: A measurement of a bird's wing shape that indicates flight efficiency and dispersal ability 
 
-- Habitat: Where the bird lives
-- Trophic.level: Categorical variable based on the composition of a birds' diet
-- Hangwingindex: A measurement of a bird's wing shape that indicates flight efficiency and dispersal ability
+- **Beak.width**: Width of the beak at the anterior edge of the nostrils
 
+- **Beak.depth**: Depth of the beak at the anterior edge of the nostrils
 
+- **Centroid.Latitude**: The geometric centre of the species range
 
+- **Mass** : Body mass of species average
 
-- Beak.width: Width of the beak at the anterior edge of the nostrils
-- Beak.depth: Depth of the beak at the anterior edge of the nostrils
-- Centroid.Latitude: The geometric centre of the species range
-- Mass: Body mass of species average
-- Wing.length: Length from the carpal joint to the tip of the longest primary on the unflattened wing
+- **Wing.length** : Length from the carpal joint to the tip of the longest primary on the unflattened wing
 
 
 
@@ -78,7 +89,7 @@ Avonet birdtree contains summary statistics on specific characteristics of birds
 ### 1. Correlation: Beak Width & Beak Depth
 
 \n
-We began by exploring correlations between traits we suspected to be related based on our knowlegde of bird biology. After constructing a scatterplot with a linear model, the line of best fit indicated a strong positive correlation between beak width and beak depth.
+We began by exploring any correlations between traits we suspected to be related, based on our knowlegde of basic bird biology. After constructing a scatterplot with a linear model, the line of best fit indicated a strong positive correlation between beak width and beak depth.
 
 ```{r beak length and depth correlation, echo=FALSE}
 #Hypothesis: Bird beak depth increases as beak length increases. Positive correlation.
@@ -95,7 +106,7 @@ ggplot(data, aes(x=Beak.Width, y=Beak.Depth, color = Centroid.Latitude))+
 ### 2.Predicting Latitude
 
 \n
-We then attempted to predict centroid latitude using these morphological variables (beak width and length). However, our model showed no meaningful visual correlation- the colours were mixed throughout the plane of the graph. This suggests that latitude of bird habitats do not strongly affect their morphological adaptations. The lack of correlation was confirmed by our model, using beak shape to predict latitude:
+We then attempted to predict centroid latitude using these morphological variables (beak width and length). However, our model showed no meaningful visual correlation- the colours were mixed throughout the plane of the graph. This suggested that the latitude of a bird's habitat do not strongly affect their beak shape. The lack of correlation was confirmed by our model whcih attempted to use beak shape to predict latitude:
 ```{r predicting latitude, echo=FALSE}
 
 # Start modelling
@@ -128,7 +139,7 @@ data_pred1 <- predict(data_fit1, data_test1) %>%
 ```
 
 \n
-The RMSE of 22.2 suggests an average error of 22.2 when predicting latitude. This is a very high error in the context of latitude, which ranges from -90 to 90. A very low R squared value of 0.002 suggests that the model's predictions is not aligned with the actual data, and that centroid latitude is not explained by beak shape.
+The RMSE of **22.2** suggests an average error of 22.2 when predicting latitude. This is a very high error in the context of latitude, which ranges from -90 to 90 (around a 12% error). A very low R squared value of **0.002** suggests that the model does very little to explain the variance in latitude.
 ```{r predicting latitude split test, echo=FALSE}
 # Check model performance
 folds1 <- vfold_cv(data_train1, v = 5)
@@ -145,7 +156,7 @@ collect_metrics(data_fit_rs1)
 Our further explorations investigated whether the geographic range size of a species could predict whether it belonged to the trophic category scavenger.
 
 \n
-First, we conducted a visual exploration of the range Size of birds at different trophic levels via a jitter map. The graph showed that there are some differences in the distribution range of different trophic groups: the range size of carnivorous species is larger and more scattered, while herbivores and omnivores usually have a more medium-sized and more concentrated distribution range. The range of scavengers is relatively small. Overall, there was a weak correlation between trophic level and range size, but it still showed a basic distribution trend. 
+First, we constructed a visualization of the range Size of birds at different trophic levels via a jitter plot. The graph showed that there are some differences in the distribution range of different trophic groups: the range size of carnivorous species is larger and more scattered, while herbivores and omnivores usually have a more medium-sized and more concentrated distribution range. The range of scavengers is relatively small. Overall, there was a weak correlation between trophic level and range size, but there was still some evidence of a distributive trend across species.
 
 ```{r exploring trophic level using geom_jitter,  echo=FALSE}
 
@@ -165,7 +176,7 @@ ggplot(data_clean, aes(x = Trophic.Level, y = Range.Size)) +
 ```
 
 \n
-We then decided to try to use a model to analyse the trophic level variable of scavengers with its relationship with range Size. We re-encoded trophic Level as a binary categorical variable to distinguish scavengers ("yes") from non-scavengers ("no").  
+We then decided to try to use a model to predict whether or not a bird was a scavenger by using its range Size value. As we planned to use a logistic regression model, we re-encoded trophic Level as a binary categorical variable, and distinguish scavengers ("yes") from non-scavengers ("no").  
 
 
 ```{r exploring trophic level using modelling, echo=FALSE}
@@ -185,7 +196,7 @@ data_pred %>%
 ```
 
 \n
-Then, using range size as the only independent variable, we constructed a logistic regression model. The resulting AUC was 0.8027, indicating that there are certain trend differences among species of different range sizes in terms of whether they are scavengers.
+Then, using range size as the only independent variable, we constructed a logistic regression model. The resulting AUC was **0.8027**, indicating that the model is somewhat successful in predicting whether a bird is a scavenger, and that there is are significant differences among species of different range sizes based on whether they are scavengers or not.
 
 ```{r exploring trophic level using modelling AUC value, echo=FALSE}
 data_pred %>%
@@ -196,7 +207,7 @@ data_pred2 <- data_pred %>%
 ```
 
 \n
-A possible explanation for the limitations of the model could be the very small sample size of scavengers within the data, which was 20.
+However, a limitation of the model is the very small sample size of scavengers within the data, which was **20**.
 
 ```{r size of trophic levels, echo= FALSE}
 data %>%
@@ -207,7 +218,7 @@ data %>%
 
 ### 4. Predicting Trophic Niche
 \n
-As we were unsuccessful in predicting trophic level, we moved onto attempting to predict the variable trophic niche, more specifically, whether a bird is an invertivore. We selected hand wing index as a variable and fitted a logistic regression model:
+As we were unsuccessful in predicting trophic level, we moved onto attempting to predict the variable trophic niche: more specifically, whether a bird is an invertivore. We selected hand wing index as a variable and fitted a logistic regression model:
 
 ```{r invertivore ~ handwingindex, echo=FALSE}
 
@@ -243,7 +254,7 @@ data_pred1 <- predict(data_fit1, data_test1, type = "prob") %>%
 ```
 
 \n
-We then checked the model performance, which revealed a relatively high AUC of 0.73, so it's relatively useful in predicting whether the bird is inventivore or not.
+We then checked the model performance, which revealed a relatively high AUC of **0.73**, which suggests it's relatively useful in predicting whether the bird is invertivore or not.
 
 ```{r check model performence, echo=FALSE}
 cut_off_prob <- 0.45
@@ -286,7 +297,7 @@ collect_metrics(data_fit_rs1)
 
 ### 5. Improving our prediction on Trophic Niche
 \n 
-In order to improve the model’s ability to distinguish invertivores from other birds, we added a new variable, ```mass```, to the model. We came to this decision after constructing a ```geom_jitter()``` plot, which visually suggested some correlation between trophic niche and mass:
+In order to improve the model’s ability to distinguish invertivores from other birds, we added a new variable, mass, to the model. We came to this decision after constructing a ```geom_jitter()``` plot, which visually suggested some correlation between trophic niche and mass:
 
 ```{r find mass could be a predictor as well, echo=FALSE}
 data %>%
@@ -382,13 +393,19 @@ Specificity <- TN/(TN+FP)
 Specificity
 ```
 \n
- The AUC increased from 0.73 to 0.79, which suggests an improvement on the model's ability to predict whether a bird is an invertivore.
+ The AUC increased from **0.73** to **0.79**, which suggests an improvement on the model's ability to predict whether a bird is an invertivore.
  
 # 6. Generalisation Performance (Train–Test Split Evaluation)
 \n 
-To assess how well our models generalise beyond the training data, we applied a train–test split and evaluated the model on a separate test set that was not used during model fitting. This allows us to check whether the patterns learned in the training process hold up when the model encounters new observations. The test-set metrics therefore provide a more realistic indication of predictive performance. In our results, the training-set AUC values were noticeably higher than the test-set AUC values, and the accuracy on the test set was influenced by class imbalance. The sharp drop in AUC indicates that the models do not generalise well and may overfit the training data, which means their predictive ability is limited when applied to unseen cases.
+To assess how well our models generalised beyond the training data, we applied a train–test split and evaluated the model on a separate test set that was not used during model fitting, to check whether the patterns learned in the training process holds up when the model encounters new observations:
 
-```{r Train–Test Split (HWI-only)}
+\n
+The test-set metrics therefore provide a more realistic indication of predictive performance. 
+
+\n
+First, we applied the train-test split to Hand Wing Index alone:
+
+```{r Train–Test Split (HWI-only), echo=FALSE}
 data_hwi <- data %>% 
   select(Trophic.Niche, `Hand-Wing.Index`) %>% 
   mutate(Invertivore = ifelse(Trophic.Niche == "Invertivore", 1, 0)) %>% 
@@ -417,14 +434,28 @@ hwi_sensitivity <- sens(hwi_test_pred, truth = Invertivore, estimate = .pred_cla
 hwi_specificity <- spec(hwi_test_pred, truth = Invertivore, estimate = .pred_class)
 
 hwi_auc
-hwi_accuracy
-hwi_conf_mat
-hwi_sensitivity
-hwi_specificity
-
 ```
 
-```{r Train–Test Split (HWI + Mass)}
+```{r Train–Test Split 1(HWI-only), echo=FALSE}
+hwi_accuracy
+```
+
+```{r Train–Test Split 2(HWI-only), echo=FALSE}
+hwi_conf_mat
+```
+
+```{r Train–Test Split 3(HWI-only), echo=FALSE}
+hwi_sensitivity
+```
+
+```{r Train–Test Split 4(HWI-only), echo=FALSE}
+hwi_specificity
+```
+
+\n
+We then applied the train-test split to the Hand Wing Index AND mass:
+
+```{r Train–Test Split (HWI + Mass), echo=FALSE}
 data_hwi2 <- data %>% 
   select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>% 
   mutate(Invertivore = ifelse(Trophic.Niche == "Invertivore", 1, 0)) %>%
@@ -460,22 +491,41 @@ hwi_mass_specificity
 
 ```
 
-# Discussion
+\n
+The training-set AUC value wss noticeably higher than the test-set AUC values: the sharp drop in AUC indicates that the models do not generalise well and may be overfit to the training data, which means its predictive ability is limited when applied to unseen cases.
+
+
+# Discussions
 \n 
-Advantages
-\n 
-One advantage of our investigation is that it applies a range of statistical and data-science tools rather than relying on a single method. By using exploratory data analysis, several forms of regression, and multiple performance metrics, we were able to evaluate the dataset from different perspectives and understand both its structure and its limitations. The project also allowed us to practise key skills such as transforming variables, handling categorical outcomes, comparing models, and interpreting evaluation measures like AUC, sensitivity, specificity, and confusion matrices. A further strength is that the training and test AUC values were very similar, which suggests that our evaluation was reliable and not overly dependent on the training data. Overall, the analysis demonstrates our ability to think critically about modelling choices, assess whether a method is appropriate, and adjust our approach when initial attempts do not produce meaningful results.
+
+### Successes
 
 \n 
-Limitations
-\n 
-Our investigation also has several limitations. The early linear regressions showed that morphology had almost no ability to explain variables such as latitude, trophic level, or range size, indicating that these relationships depend on many factors not included in the dataset. Some categories, such as scavengers, had too few observations to support meaningful analysis. In the logistic phase, class imbalance made it difficult for the model to identify invertivores, and although the test-set AUC was similar to the training AUC, the overall predictive power remained moderate, meaning the model was only partially successful at separating invertivores from other birds rather than clearly overfitting. The modelling techniques we used were also fairly simple, and our evaluation relied on a single train–test split, meaning the results may vary depending on the way the data were divided. Finally, although the dataset is publicly available, it is important to report our findings cautiously and avoid overstating the model’s predictive ability, given these limitations.
+One advantage of our investigation was that it applied a range of statistical tools (eg. many visualisation methods, different statistical models), rather than relying on a single method. By using exploratory data analysis, several forms of regression, and multiple performance metrics, we were able to evaluate the dataset from different perspectives to understand both its structure and its limitations. 
+
+\n
+The project also allowed us to practise skills such as transforming variables, handling categorical outcomes, comparing models, and interpreting values like AUC, sensitivity, specificity, and confusion matrices within the context of our data. Alsp, our training and test AUC values were very similar, suggesting that our evaluation was reliable and not overly dependent on the training data. 
+
+\n
+Overall, our analysis demonstrated our ability to think critically about modelling choices, assess whether a method is appropriate, and adjust our approach when our initial attempts did not produce meaningful results.
 
 \n 
-Future Work
+
+### Limitations
+
 \n 
-For future improvement, we would like to expand the modelling approach by incorporating regression methods that offer more flexibility than the basic techniques used in this investigation. This would allow us to capture patterns that simple linear or logistic models could not address. We would also try to learn and strengthen our evaluation process by applying cross-validation in logistic models, which provides a more reliable assessment of model performance than relying on a single train–test split. In addition, we would consider approaches for handling class imbalance and explore how different classification thresholds affect performance. These steps would allow the analysis to become more robust and better suited for complex datasets.
+Our investigation, however, has several limitations. The early linear regressions showed that morphology had almost no ability to explain variables such as latitude, trophic level, or range size. Some categories, such as scavengers, had too few observations to support meaningful analysis. In the logistic phase, class imbalance made it difficult for the model to identify invertivores, and although the test-set AUC was similar to the training AUC, the overall predictive power remained moderate, meaning the model was only partially successful at separating invertivores from other trophic niches. The modelling techniques we used were also fairly simple, and our evaluation relied on a single train–test split, meaning the results may have varied depending on the way the data was divided. 
+
+\n
+Another limitation could be that each species within the data has multiple invidivuals, yet each species represents one value for each variable, the value of which is an average. If each individual bird held its own value for each of the variables, perhaps the correlations between and the predictive power of variables could have been more significant.
+
+\n 
+
+### Future Work
+
+\n 
+For improvement, we could expand the modelling approach by incorporating regression methods that offer more flexibility than the basic ones used in this investigation. This would allow us to capture patterns that simple linear or logistic models could not identify. We could also strengthen our evaluation process by applying cross-validation in logistic models, which would provide a more reliable assessment of the models' performance rather than relying on a single train–test split. By considering approaches to handling class imbalance and explore how different classification thresholds affect performance, we would also be able to improve our analysis to be more robust and better suited for complex datasets.
 
 # Conclusion
 \n 
-Overall, our investigation showed that the ecological variables we initially explored—latitude, trophic level, and range size—had almost no relationship with the morphological traits in our dataset, as reflected by near-zero R² values and high prediction error in the linear models. When we shifted to a logistic regression framework to predict whether a species is an invertivore, the training-set results improved after adding Mass as a predictor, suggesting that it contributed additional information beyond Hand-Wing Index.The train and test AUC values (approximately 0.73 and 0.75, respectively) were very similar, indicating that the model generalised reasonably well rather than overfitting, although its predictive performance remained moderate overall. These findings demonstrate that, although different modelling techniques helped us examine the dataset from multiple angles, the overall predictive ability remained limited, and more informative variables or a richer dataset would be required for stronger modelling outcomes.
+Overall, our investigation showed that the ecological variables we initially explored (latitude, trophic level, and range size) had almost no relationship with the morphological traits in our dataset, as reflected by near-zero R² values and error in the linear models. When we shifted to a logistic regression framework to predict whether a bird is an invertivore, the training-set results improved after adding Mass as a predictor, suggesting that it contributed additional predictive power beyond Hand-Wing Index.The train and test AUC values (approximately 0.73 and 0.75, respectively) were very similar, indicating that the model generalised reasonably well rather than overfitting, although its predictive performance remained moderate. These findings demonstrated that overall predictive ability of the variables is limited, and more informative variables or a richer dataset would be required for stronger modelling outcomes.
