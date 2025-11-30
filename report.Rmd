@@ -1,6 +1,6 @@
 ---
 title: "Project title"
-author: "by Team-Name: Naomi Pihlaja, Jiaxi Yan, Yupeng Qiu, J|iayi Chen"
+author: "by Team-Name: Naomi Pihlaja, Jiaxi Yan, Yupeng Qiu, Jiayi Chen"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -216,17 +216,13 @@ data_hwi <- data %>%
   select(Trophic.Niche, `Hand-Wing.Index`) %>% 
   mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
                        TRUE ~ "0"))
-
-
-# Start modelling
 set.seed(8888)
 data_split1 <- initial_split(data_hwi, 0.8)
 data_train1 <- training(data_split1)
 data_test1 <- testing(data_split1)
 
-
 # Construct workflow
-data_rec1 <- recipe(Invertivore ~ `Hand-Wing.Index`, data = data_train1) %>% 
+data_rec1 <- recipe(Invertivore ~ `Hand-Wing.Index`, data = data_hwi) %>% 
   step_naomit(all_predictors()) %>% 
   step_dummy(all_nominal(), -all_outcomes())
 
@@ -239,8 +235,8 @@ data_wflow1 <- workflow() %>%
 
 data_fit1 <- data_wflow1 %>% 
   fit(data = data_train1)
-# tidy(data_fit)
 
+# tidy(data_fit)
 data_pred1 <- predict(data_fit1, data_test1, type = "prob") %>% 
   bind_cols(data_test1) %>% 
   print(n = 10)
@@ -307,14 +303,10 @@ data_hwi2 <- data %>%
   select(Trophic.Niche, `Hand-Wing.Index`, Mass) %>% 
   mutate(Invertivore = case_when(Trophic.Niche == "Invertivore" ~ "1", 
                        TRUE ~ "0"))
-
-
-# Start modelling
 set.seed(8888)
-data_split2 <- initial_split(data_hwi2)
+data_split2 <- initial_split(data_hwi2, 0.8)
 data_train2 <- training(data_split2)
 data_test2 <- testing(data_split2)
-
 
 # Construct workflow
 data_rec2 <- recipe(Invertivore ~ `Hand-Wing.Index` + Mass, data = data_train2) %>% 
@@ -472,12 +464,12 @@ hwi_mass_specificity
 \n 
 Advantages
 \n 
-One advantage of our investigation is that it applies a range of statistical and data-science tools rather than relying on a single method. By using exploratory data analysis, several forms of regression, and multiple performance metrics, we were able to evaluate the dataset from different perspectives and understand both its structure and its limitations. The project also allowed us to practise key skills such as transforming variables, handling categorical outcomes, comparing models, and interpreting evaluation measures like AUC, sensitivity, specificity, and confusion matrices. Overall, the analysis demonstrates our ability to think critically about modelling choices, assess whether a method is appropriate, and adjust our approach when initial attempts do not produce meaningful results.
+One advantage of our investigation is that it applies a range of statistical and data-science tools rather than relying on a single method. By using exploratory data analysis, several forms of regression, and multiple performance metrics, we were able to evaluate the dataset from different perspectives and understand both its structure and its limitations. The project also allowed us to practise key skills such as transforming variables, handling categorical outcomes, comparing models, and interpreting evaluation measures like AUC, sensitivity, specificity, and confusion matrices. A further strength is that the training and test AUC values were very similar, which suggests that our evaluation was reliable and not overly dependent on the training data. Overall, the analysis demonstrates our ability to think critically about modelling choices, assess whether a method is appropriate, and adjust our approach when initial attempts do not produce meaningful results.
 
 \n 
 Limitations
 \n 
-Our investigation also has several limitations. The early linear regressions showed that morphology had almost no ability to explain variables such as latitude, trophic level, or range size, indicating that these relationships depend on many factors not included in the dataset. Some categories, such as scavengers, had too few observations to support meaningful analysis. In the logistic phase, class imbalance made it difficult for the model to identify invertivores, and the sharp drop in test-set AUC suggests that the model does not generalise well and may overfit the training data. The modelling techniques we used were also fairly simple, and our evaluation relied on a single train–test split, meaning the results may vary depending on the way the data were divided. Finally, although the dataset is publicly available, it is important to report our findings cautiously and avoid overstating the model’s predictive ability, given these limitations.
+Our investigation also has several limitations. The early linear regressions showed that morphology had almost no ability to explain variables such as latitude, trophic level, or range size, indicating that these relationships depend on many factors not included in the dataset. Some categories, such as scavengers, had too few observations to support meaningful analysis. In the logistic phase, class imbalance made it difficult for the model to identify invertivores, and although the test-set AUC was similar to the training AUC, the overall predictive power remained moderate, meaning the model was only partially successful at separating invertivores from other birds rather than clearly overfitting. The modelling techniques we used were also fairly simple, and our evaluation relied on a single train–test split, meaning the results may vary depending on the way the data were divided. Finally, although the dataset is publicly available, it is important to report our findings cautiously and avoid overstating the model’s predictive ability, given these limitations.
 
 \n 
 Future Work
@@ -486,4 +478,4 @@ For future improvement, we would like to expand the modelling approach by incorp
 
 # Conclusion
 \n 
-Overall, our investigation showed that the ecological variables we initially explored—latitude, trophic level, and range size—had almost no relationship with the morphological traits in our dataset, as reflected by near-zero R² values and high prediction error in the linear models. When we shifted to a logistic regression framework to predict whether a species is an invertivore, the training-set results improved after adding Mass as a predictor, suggesting that it contributed additional information beyond Hand-Wing Index. However, the test-set AUC values fell sharply, indicating poor generalisation and showing that the available morphological measurements are not sufficient for reliable classification. These findings demonstrate that, although different modelling techniques helped us examine the dataset from multiple angles, the overall predictive ability remained limited, and more informative variables or a richer dataset would be required for stronger modelling outcomes.
+Overall, our investigation showed that the ecological variables we initially explored—latitude, trophic level, and range size—had almost no relationship with the morphological traits in our dataset, as reflected by near-zero R² values and high prediction error in the linear models. When we shifted to a logistic regression framework to predict whether a species is an invertivore, the training-set results improved after adding Mass as a predictor, suggesting that it contributed additional information beyond Hand-Wing Index.The train and test AUC values (approximately 0.73 and 0.75, respectively) were very similar, indicating that the model generalised reasonably well rather than overfitting, although its predictive performance remained moderate overall. These findings demonstrate that, although different modelling techniques helped us examine the dataset from multiple angles, the overall predictive ability remained limited, and more informative variables or a richer dataset would be required for stronger modelling outcomes.
