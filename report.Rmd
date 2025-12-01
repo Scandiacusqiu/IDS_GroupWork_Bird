@@ -433,11 +433,11 @@ hwi_conf_mat   <- conf_mat(hwi_test_pred, truth = Invertivore, estimate = .pred_
 hwi_sensitivity <- sens(hwi_test_pred, truth = Invertivore, estimate = .pred_class)
 hwi_specificity <- spec(hwi_test_pred, truth = Invertivore, estimate = .pred_class)
 
-hwi_mass_auc
-hwi_mass_accuracy
-hwi_mass_conf_mat
-hwi_mass_sensitivity
-hwi_mass_specificity
+hwi_auc
+hwi_accuracy
+hwi_conf_mat
+hwi_sensitivity
+hwi_specificity
 ```
 
 \n
