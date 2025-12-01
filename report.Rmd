@@ -433,23 +433,11 @@ hwi_conf_mat   <- conf_mat(hwi_test_pred, truth = Invertivore, estimate = .pred_
 hwi_sensitivity <- sens(hwi_test_pred, truth = Invertivore, estimate = .pred_class)
 hwi_specificity <- spec(hwi_test_pred, truth = Invertivore, estimate = .pred_class)
 
-hwi_auc
-```
-
-```{r Train–Test Split 1(HWI-only), echo=FALSE}
-hwi_accuracy
-```
-
-```{r Train–Test Split 2(HWI-only), echo=FALSE}
-hwi_conf_mat
-```
-
-```{r Train–Test Split 3(HWI-only), echo=FALSE}
-hwi_sensitivity
-```
-
-```{r Train–Test Split 4(HWI-only), echo=FALSE}
-hwi_specificity
+hwi_mass_auc
+hwi_mass_accuracy
+hwi_mass_conf_mat
+hwi_mass_sensitivity
+hwi_mass_specificity
 ```
 
 \n
@@ -501,20 +489,17 @@ The training-set AUC value wss noticeably higher than the test-set AUC values: t
 ### Successes
 
 \n 
-One advantage of our investigation was that it applied a range of statistical tools (eg. many visualisation methods, different statistical models), rather than relying on a single method. By using exploratory data analysis, several forms of regression, and multiple performance metrics, we were able to evaluate the dataset from different perspectives to understand both its structure and its limitations. 
+One advantage of our investigation was that it applied a range of statistical tools (e.g., many visualisation methods and different statistical models) rather than relying on a single method. By using exploratory data analysis, several forms of regression, and multiple performance metrics, we were able to evaluate the dataset from different perspectives, while also practising skills such as transforming variables, handling categorical outcomes, comparing models, and interpreting measures like AUC, sensitivity, specificity, and confusion matrices.
 
-\n
-The project also allowed us to practise skills such as transforming variables, handling categorical outcomes, comparing models, and interpreting values like AUC, sensitivity, specificity, and confusion matrices within the context of our data. Alsp, our training and test AUC values were very similar, suggesting that our evaluation was reliable and not overly dependent on the training data. 
-
-\n
-Overall, our analysis demonstrated our ability to think critically about modelling choices, assess whether a method is appropriate, and adjust our approach when our initial attempts did not produce meaningful results.
+\n 
+In addition, our training and test AUC values were very similar, suggesting that our evaluation was reliable and not overly dependent on the training data. Taken together, these elements demonstrated our ability to think critically about modelling choices, assess whether a method is appropriate, and adjust our approach when initial attempts did not produce meaningful results.
 
 \n 
 
 ### Limitations
 
 \n 
-Our investigation, however, has several limitations. The early linear regressions showed that morphology had almost no ability to explain variables such as latitude, trophic level, or range size. Some categories, such as scavengers, had too few observations to support meaningful analysis. In the logistic phase, class imbalance made it difficult for the model to identify invertivores, and although the test-set AUC was similar to the training AUC, the overall predictive power remained moderate, meaning the model was only partially successful at separating invertivores from other trophic niches. The modelling techniques we used were also fairly simple, and our evaluation relied on a single train–test split, meaning the results may have varied depending on the way the data was divided. 
+Our investigation, however, has several limitations. The early linear regressions showed that morphology had almost no ability to explain variables such as latitude, trophic level, or range size. Some categories, such as scavengers, had too few observations to support meaningful analysis. In the logistic phase, class imbalance made it difficult for the model to identify invertivores, and although the test-set AUC was similar to the training AUC, the overall predictive power remained moderate, meaning the model was only partially successful at separating invertivores from other trophic niches. The modelling techniques we used were fairly simple, and our evaluation relied on a single train–test split, so the results might change under a different partition.
 
 \n
 Another limitation could be that each species within the data has multiple invidivuals, yet each species represents one value for each variable, the value of which is an average. If each individual bird held its own value for each of the variables, perhaps the correlations between and the predictive power of variables could have been more significant.
@@ -528,4 +513,4 @@ For improvement, we could expand the modelling approach by incorporating regress
 
 # Conclusion
 \n 
-Overall, our investigation showed that the ecological variables we initially explored (latitude, trophic level, and range size) had almost no relationship with the morphological traits in our dataset, as reflected by near-zero R² values and error in the linear models. When we shifted to a logistic regression framework to predict whether a bird is an invertivore, the training-set results improved after adding Mass as a predictor, suggesting that it contributed additional predictive power beyond Hand-Wing Index.The train and test AUC values (approximately 0.73 and 0.75, respectively) were very similar, indicating that the model generalised reasonably well rather than overfitting, although its predictive performance remained moderate. These findings demonstrated that overall predictive ability of the variables is limited, and more informative variables or a richer dataset would be required for stronger modelling outcomes.
+Overall, our investigation showed that the ecological variables we initially explored (latitude, trophic level, and range size) had almost no relationship with the morphological traits in our dataset, as reflected by near-zero R² values and error in the linear models. When we shifted to a logistic regression framework to predict whether a bird is an invertivore, the training-set results improved after adding Mass as a predictor, suggesting that it contributed additional predictive power beyond Hand-Wing Index. The train and test AUC values (approximately 0.73 and 0.75, respectively) were very similar, indicating that the model generalised reasonably well rather than overfitting, although its predictive performance remained moderate. Overall, the model offered a reasonable level of insight into the dataset, even though its predictive strength remained moderate.
